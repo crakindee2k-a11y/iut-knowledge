@@ -45,7 +45,9 @@
       ],
       "tier": "crucial",
       "glance": "The public leaderboard grades you on macro-F1 — we proved it, not guessed it.",
-      "why": "It tells us exactly what to optimize. Aim for balanced accuracy on both classes, not just catching hallucinations."
+      "why": "It tells us exactly what to optimize. Aim for balanced accuracy on both classes, not just catching hallucinations.",
+      "keyEvidence": "We submitted a test file labeling every row \"hallucinated\". It scored 0.314. If the metric were macro-F1, the math predicts exactly 0.3126 at our sample's hallucination rate (45.5%) — a near-perfect match. The other candidate metric would have scored 0.625, so it's ruled out.",
+      "caveat": "Confidence: HIGH for the PUBLIC board. This does not prove what the private/final board uses — see the next finding."
     },
     {
       "id": "F-002",
@@ -85,7 +87,9 @@
       ],
       "tier": "crucial",
       "glance": "The private/final score might use a different metric than the public board.",
-      "why": "A model that tops the public board could rank lower on the real (private) score. We should hedge."
+      "why": "A model that tops the public board could rank lower on the real (private) score. We should hedge.",
+      "keyEvidence": "Two official pages disagree: the Evaluation tab says macro-F1, but Rules §7 says binary-F1 on the hallucinated class for the private board and Phase-2. We proved the public board is macro-F1, but the private one is untestable until the reveal.",
+      "caveat": "Confidence: LOW / unresolved. We literally cannot check this before the deadline. Safest to assume the private metric may differ and hedge."
     },
     {
       "id": "F-003",
@@ -220,7 +224,9 @@
       ],
       "tier": "crucial",
       "glance": "The extra data the rules mention (cached model answers, difficulty labels) is NOT in the download.",
-      "why": "Don't build anything that depends on it, and we can't directly train for the cultural tie-breaker band."
+      "why": "Don't build anything that depends on it, and we can't directly train for the cultural tie-breaker band.",
+      "keyEvidence": "The competition download has exactly 3 files: the sample set, the test set, and the submission template. The \"cached model answers\" and \"difficulty/cultural-distance labels\" the rules talk about are not among them.",
+      "caveat": "Confidence: HIGH. Because the difficulty band labels are missing, we can't directly train or tune for the cultural tie-breaker — we can only approximate it."
     },
     {
       "id": "F-007",
@@ -256,7 +262,9 @@
       ],
       "tier": "crucial",
       "glance": "Split the problem in two by whether a source passage is given — they need different tools.",
-      "why": "With a passage: check if the answer matches it. Without one: check real-world Bangladesh facts. Two engines, routed automatically."
+      "why": "With a passage: check if the answer matches it. Without one: check real-world Bangladesh facts. Two engines, routed automatically.",
+      "keyEvidence": "About 54% of test rows come with a source passage; ~46% do not. These are fundamentally different tasks: one is \"does the answer match this passage\", the other is \"is this real-world Bangladesh fact true\". A simple check on the context field routes each row to the right engine.",
+      "caveat": "Confidence: MEDIUM. The routing split is solid; which model wins each side is still open and needs experiments."
     },
     {
       "id": "F-008",

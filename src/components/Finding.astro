@@ -55,14 +55,23 @@ function gloss(text) {
       <p class="why"><span class="lbl">Why it matters</span><span set:html={gloss(f.why)}></span></p>
     )}
 
+    <div class="explain" set:html={gloss(f.body)}></div>
+
+    {f.keyEvidence && (
+      <div class="keyev"><span class="lbl">How we know</span><span set:html={gloss(f.keyEvidence)}></span></div>
+    )}
+
     {f.action && (
       <div class="action"><span class="lbl">Do this</span><span set:html={gloss(f.action)}></span></div>
     )}
 
+    {f.caveat && (
+      <p class="caveat"><span set:html={gloss(f.caveat)}></span></p>
+    )}
+
     <details class="tech">
-      <summary>Technical detail · for AI agents</summary>
+      <summary>Full detail &amp; sources</summary>
       <div class="tech-inner">
-        <p class="body" set:html={gloss(f.body)}></p>
         {f.evidence?.map((e) => (
           <div class="evidence">
             <blockquote>{e.quote}</blockquote>
