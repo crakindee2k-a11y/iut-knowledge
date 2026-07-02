@@ -102,10 +102,12 @@ code, .mono { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size:
 .finding > summary:hover .vdot { transform: scale(1.25); }
 .vdot.verified { background: var(--teal); } .vdot.unresolved { background: var(--amber); } .vdot.contradicted { background: var(--pink); }
 .s-glance { flex: 1; font-family: var(--disp); font-weight: 600; font-size: 1.02rem; letter-spacing: -0.01em; line-height: 1.35; }
-.s-who { display: inline-flex; align-items: center; gap: 0.4rem; flex: none; }
-.s-dot { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-family: var(--disp); font-size: 9px; font-weight: 700; color: #fff; background: var(--indigo); border: 2px solid var(--ink); flex: none; }
-.s-handle { font-family: var(--disp); font-size: 12px; font-weight: 600; color: var(--dim); }
-@media (max-width: 620px) { .s-handle { display: none; } }
+/* messenger-style author block on the left of each row */
+.s-who { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; flex: none; width: 52px; }
+.s-dot { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-family: var(--disp); font-size: 12px; font-weight: 700; color: #fff; background: var(--indigo); border: 2px solid var(--ink); flex: none; box-shadow: 2px 2px 0 rgba(23,19,43,0.15); }
+.s-dot.verified { background: var(--teal); } .s-dot.unresolved { background: var(--amber); } .s-dot.contradicted { background: var(--pink); }
+.s-handle { font-family: var(--disp); font-size: 10px; font-weight: 600; color: var(--faint); max-width: 52px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 620px) { .s-who { width: 38px; } .s-handle { display: none; } }
 .s-tags { display: inline-flex; align-items: center; gap: 0.5rem; flex: none; }
 .finding > summary .f-id { font-family: ui-monospace, monospace; font-size: 11px; color: var(--faint); }
 .finding > summary .f-ver { font-family: ui-monospace, monospace; font-size: 11px; color: var(--indigo); font-weight: 600; }

@@ -29,12 +29,11 @@ function gloss(text) {
 ---
 <details class="finding" data-verdict={f.verdict} data-cat={f.category} id={f.id} style={`--i:${i}`}>
   <summary>
-    <span class={`vdot ${f.verdict}`} title={f.verdict}></span>
-    <span class="s-glance" set:html={gloss(f.glance || f.summary)}></span>
     <span class="s-who" title={`found by ${handle(f.author)}`}>
-      <span class="s-dot">{initials(f.author)}</span>
+      <span class={`s-dot ${f.verdict}`}>{initials(f.author)}</span>
       <span class="s-handle">{handle(f.author)}</span>
     </span>
+    <span class="s-glance" set:html={gloss(f.glance || f.summary)}></span>
     <span class="s-tags">
       <span class="f-id">{f.id}</span>
       {f.redact && <span class="badge redact">redact</span>}
