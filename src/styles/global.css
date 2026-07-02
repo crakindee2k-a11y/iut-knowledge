@@ -122,13 +122,14 @@ code, .mono { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size:
 .f-title { font-family: var(--disp); font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; color: var(--ink); margin: 0.2rem 0 0.7rem; line-height: 1.25; }
 
 .why { background: var(--indigo-soft); border-radius: 12px; padding: 0.85rem 1rem; margin: 0 0 0.9rem; font-size: 0.98rem; font-weight: 500; color: var(--ink); }
-.why .lbl, .action .lbl, .cl .lbl, .keyev .lbl { font-family: var(--disp); font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--indigo); display: block; margin-bottom: 0.3rem; }
+.why .lbl, .action .lbl, .cl .lbl { font-family: var(--disp); font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--indigo); display: block; margin-bottom: 0.3rem; }
+.keyev .lbl { font-family: var(--disp); font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #3a6ea5; display: block; margin-bottom: 0.3rem; }
 .action { background: var(--teal-soft); border-radius: 12px; padding: 0.85rem 1rem; margin: 0 0 0.9rem; font-size: 0.98rem; color: var(--ink); }
 .action .lbl { color: #065f56; }
 
 /* human layer — richer detail for teammates, not one-liners */
 .explain { font-size: 0.98rem; color: var(--dim); line-height: 1.65; margin: 0 0 0.9rem; }
-.keyev { border-left: 3px solid var(--indigo); background: var(--indigo-soft); border-radius: 0 10px 10px 0; padding: 0.75rem 1rem; margin: 0 0 0.9rem; font-size: 0.95rem; color: var(--ink); line-height: 1.6; }
+.keyev { border-left: 3px solid #3a6ea5; background: #eef4fb; border-radius: 0 10px 10px 0; padding: 0.75rem 1rem; margin: 0 0 0.9rem; font-size: 0.95rem; color: var(--ink); line-height: 1.6; }
 .caveat { font-size: 0.9rem; color: var(--faint); font-style: italic; margin: 0 0 0.4rem; padding-left: 0.9rem; border-left: 2px solid var(--line); }
 
 /* glossary — custom styled popup (no native title tooltip) */
