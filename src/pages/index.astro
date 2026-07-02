@@ -4,7 +4,11 @@ import Finding from '../components/Finding.astro';
 import data from '../data/findings.json';
 import team from '../data/team.json';
 
-const findings = data.findings;
+// Site shows only crucial, not-already-known findings. "known" facts (label
+// convention, dataset stats, rules recaps, leaderboard snapshot) stay in the
+// data file but are hidden — teammates already know them.
+const findings = data.findings.filter((f) => f.tier === 'crucial');
+const knownCount = data.findings.filter((f) => f.tier === 'known').length;
 const verifiedCount = findings.filter((f) => f.verdict === 'verified').length;
 const categories = [...new Set(findings.map((f) => f.category))];
 const byCat = categories.map((c) => ({ cat: c, items: findings.filter((f) => f.category === c) }));
@@ -31,13 +35,14 @@ const members = Object.entries(team.members);
       <p class="eyebrow">Team Make America Great Again · Internal</p>
       <h1>What we know, and <span class="accent">how we know it</span>.</h1>
       <p class="lede">
-        A shared ledger of verified findings for the Bengali LLM Hallucination Detection
-        Challenge. Every entry carries a verdict, a verbatim quote from the source that
-        proves it, and the date it was checked. If it is not verified, it is not here.
+        The findings that aren't in the competition brief — the ones we had to probe,
+        compute, or infer. Each carries a verdict, the verbatim quote that proves it,
+        and the date it was checked. Facts everyone already knows from the rules aren't here.
       </p>
       <div class="stamp">
         <span><b>{verifiedCount}</b> verified</span>
-        <span><b>{findings.length}</b> total findings</span>
+        <span><b>{findings.length}</b> crucial findings</span>
+        <span><b>{knownCount}</b> known facts hidden</span>
         <span>Phase-1 deadline <b>{team.team.phase1Deadline}</b></span>
       </div>
       <div class="tally" aria-hidden="true">
