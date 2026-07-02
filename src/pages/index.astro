@@ -67,6 +67,7 @@ const members = Object.entries(team.members);
       <div class="filters" role="group" aria-label="Filter findings by category">
         <button data-filter="all" aria-pressed="true">All</button>
         {categories.map((c) => <button data-filter={c} aria-pressed="false">{c}</button>)}
+        <button id="toggle-all" class="toggle-all" aria-expanded="false">Expand all</button>
       </div>
 
       {byCat.map(({ cat, items }) => (
@@ -125,7 +126,7 @@ const members = Object.entries(team.members);
   </footer>
 
   <script is:inline>
-    const btns = document.querySelectorAll('.filters button');
+    const btns = document.querySelectorAll('.filters button[data-filter]');
     const groups = document.querySelectorAll('.cat-group');
     btns.forEach((b) => b.addEventListener('click', () => {
       const f = b.dataset.filter;
@@ -134,5 +135,12 @@ const members = Object.entries(team.members);
         g.style.display = (f === 'all' || g.dataset.group === f) ? '' : 'none';
       });
     }));
+    const toggle = document.getElementById('toggle-all');
+    toggle.addEventListener('click', () => {
+      const open = toggle.getAttribute('aria-expanded') === 'true';
+      document.querySelectorAll('.finding').forEach((d) => { d.open = !open; });
+      toggle.setAttribute('aria-expanded', String(!open));
+      toggle.textContent = open ? 'Expand all' : 'Collapse all';
+    });
   </script>
 </Base>

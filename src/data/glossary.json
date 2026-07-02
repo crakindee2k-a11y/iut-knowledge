@@ -1,0 +1,14 @@
+{
+  "macro-F1": "An accuracy score that averages performance on both answer types equally, so you can't win by only getting the common one right.",
+  "binary-F1": "An accuracy score focused on one target class only — here, catching hallucinated answers.",
+  "label=0": "A hallucinated (wrong/fabricated) response.",
+  "label=1": "A faithful (correct, grounded) response.",
+  "all-0 probe": "A test submission that labels every row hallucinated, used to reverse-engineer the hidden scoring formula.",
+  "base rate": "The fraction of examples in a class — here, how often answers are hallucinated.",
+  "intrinsic": "A response that must be checked against a given source passage.",
+  "extrinsic": "A response with no source passage — must be checked against real-world knowledge.",
+  "NLI": "Natural Language Inference — a model that judges whether one text is supported by another.",
+  "closed-book": "Answering from memory with no reference passage provided.",
+  "Phase-2": "The offline round where organizers re-run your code on hidden data; worth 50% of the final score.",
+  "C1 band": "The most culturally-specific Bangladesh-knowledge slice, used as the tie-breaker."
+}

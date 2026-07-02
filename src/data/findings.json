@@ -43,7 +43,9 @@
           "note": "Scoped claim to PUBLIC LB only after anti-hallucination pass surfaced that rules §7 asserts binary-F1-on-label0 governs private LB + Phase-2. See F-002."
         }
       ],
-      "tier": "crucial"
+      "tier": "crucial",
+      "glance": "The public leaderboard grades you on macro-F1 — we proved it, not guessed it.",
+      "why": "It tells us exactly what to optimize. Aim for balanced accuracy on both classes, not just catching hallucinations."
     },
     {
       "id": "F-002",
@@ -81,7 +83,9 @@
           "note": "Logged the macro-F1 vs binary-F1 split between the Evaluation tab and Rules §7."
         }
       ],
-      "tier": "crucial"
+      "tier": "crucial",
+      "glance": "The private/final score might use a different metric than the public board.",
+      "why": "A model that tops the public board could rank lower on the real (private) score. We should hedge."
     },
     {
       "id": "F-003",
@@ -214,7 +218,9 @@
           "note": "Initial."
         }
       ],
-      "tier": "crucial"
+      "tier": "crucial",
+      "glance": "The extra data the rules mention (cached model answers, difficulty labels) is NOT in the download.",
+      "why": "Don't build anything that depends on it, and we can't directly train for the cultural tie-breaker band."
     },
     {
       "id": "F-007",
@@ -248,7 +254,9 @@
           "note": "Initial routing hypothesis."
         }
       ],
-      "tier": "crucial"
+      "tier": "crucial",
+      "glance": "Split the problem in two by whether a source passage is given — they need different tools.",
+      "why": "With a passage: check if the answer matches it. Without one: check real-world Bangladesh facts. Two engines, routed automatically."
     },
     {
       "id": "F-008",
