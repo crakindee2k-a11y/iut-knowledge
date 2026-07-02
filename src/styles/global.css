@@ -117,7 +117,7 @@ code, .mono { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size:
 @keyframes reveal { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 .f-meta { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin: 0.1rem 0 0.9rem; }
 .f-cat { font-family: var(--disp); font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); border: 2px solid var(--line); border-radius: 999px; padding: 0.15rem 0.6rem; }
-.f-title { font-size: 0.9rem; color: var(--faint); }
+.f-title { font-family: var(--disp); font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; color: var(--ink); margin: 0.2rem 0 0.7rem; line-height: 1.25; }
 
 .why { background: var(--indigo-soft); border-radius: 12px; padding: 0.85rem 1rem; margin: 0 0 0.9rem; font-size: 0.98rem; font-weight: 500; color: var(--ink); }
 .why .lbl, .action .lbl, .cl .lbl { font-family: var(--disp); font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--indigo); display: block; margin-bottom: 0.3rem; }

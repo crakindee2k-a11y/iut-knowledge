@@ -43,12 +43,12 @@ function gloss(text) {
   </summary>
 
   <div class="f-inner">
+    <h3 class="f-title" set:html={gloss(f.title)}></h3>
     <div class="f-meta">
       <span class="f-cat">{f.category}</span>
       <span class={`badge ${f.verdict}`}>{f.verdict}</span>
       <span class="badge conf">{f.confidence}</span>
       {f.critical && <span class="badge conf">critical</span>}
-      <span class="f-title" set:html={gloss(f.title)}></span>
     </div>
 
     {f.why && (
