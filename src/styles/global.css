@@ -91,7 +91,7 @@ code, .mono { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size:
 .badge.redact { color: #fff; background: var(--pink); border-style: dashed; }
 
 /* ---- finding: chunky bordered card, collapsed row ---- */
-.finding { background: var(--card); border: 2px solid var(--ink); border-radius: 16px; margin-bottom: 0.9rem; box-shadow: 4px 4px 0 rgba(36,26,23,0.12); transition: box-shadow .15s, transform .15s; overflow: hidden; }
+.finding { background: var(--card); border: 2px solid var(--ink); border-radius: 16px; margin-bottom: 0.9rem; box-shadow: 4px 4px 0 rgba(36,26,23,0.12); transition: box-shadow .15s, transform .15s; }
 .finding:hover { box-shadow: 6px 6px 0 var(--indigo); transform: translate(-1px,-1px); }
 .finding[data-verdict="verified"]:hover { box-shadow: 6px 6px 0 var(--teal); }
 .finding[data-verdict="unresolved"]:hover { box-shadow: 6px 6px 0 var(--amber); }
@@ -128,7 +128,7 @@ code, .mono { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size:
 
 /* human layer — richer detail for teammates, not one-liners */
 .explain { font-size: 0.98rem; color: var(--dim); line-height: 1.65; margin: 0 0 0.9rem; }
-.keyev { border-left: 3px solid var(--indigo); background: #faf9ff; border-radius: 0 10px 10px 0; padding: 0.75rem 1rem; margin: 0 0 0.9rem; font-size: 0.95rem; color: var(--ink); line-height: 1.6; }
+.keyev { border-left: 3px solid var(--indigo); background: var(--indigo-soft); border-radius: 0 10px 10px 0; padding: 0.75rem 1rem; margin: 0 0 0.9rem; font-size: 0.95rem; color: var(--ink); line-height: 1.6; }
 .caveat { font-size: 0.9rem; color: var(--faint); font-style: italic; margin: 0 0 0.4rem; padding-left: 0.9rem; border-left: 2px solid var(--line); }
 
 /* glossary — custom styled popup (no native title tooltip) */
