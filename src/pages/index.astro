@@ -43,16 +43,7 @@ const members = Object.entries(team.members);
         <span><b>{verifiedCount}</b> verified</span>
         <span><b>{findings.length}</b> crucial findings</span>
         <span><b>{knownCount}</b> known facts hidden</span>
-        <span>Phase-1 deadline <b>{team.team.phase1Deadline}</b></span>
-      </div>
-      <div class="tally" aria-hidden="true">
-        {findings.map((f, i) => (
-          <span
-            class="bar"
-            style={`width:${100 / findings.length}%; animation-delay:${i * 70}ms; background:${f.verdict === 'verified' ? 'var(--brass)' : f.verdict === 'unresolved' ? 'var(--sky)' : 'var(--clay)'}`}
-          ></span>
-        ))}
-        <span class="n">{verifiedCount}/{findings.length} confirmed</span>
+        <span><b>{team.team.phase1Deadline}</b> deadline</span>
       </div>
     </div>
   </section>
@@ -101,7 +92,7 @@ const members = Object.entries(team.members);
   <section class="section" id="protocol">
     <div class="wrap">
       <div class="section-head"><h2>Protocol</h2></div>
-      <p class="body" style="max-width:60ch;color:var(--paper-dim)">
+      <p class="body-p">
         Findings are added only after an anti-hallucination check: a verdict, a verbatim
         evidence quote, and a date. Nothing auto-publishes — entries live in
         <code>src/data/findings.json</code> and go live only when approved and pushed.
