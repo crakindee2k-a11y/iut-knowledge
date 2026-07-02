@@ -129,7 +129,7 @@ code, .mono { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size:
 
 /* human layer — richer detail for teammates, not one-liners */
 .explain { font-size: 0.98rem; color: var(--dim); line-height: 1.65; margin: 0 0 0.9rem; }
-.keyev { border-left: 3px solid #3a6ea5; background: #eef4fb; border-radius: 0 10px 10px 0; padding: 0.75rem 1rem; margin: 0 0 0.9rem; font-size: 0.95rem; color: var(--ink); line-height: 1.6; }
+.keyev { background: #eef4fb; border-radius: 12px; padding: 0.85rem 1rem; margin: 0 0 0.9rem; font-size: 0.95rem; color: var(--ink); line-height: 1.6; }
 .caveat { font-size: 0.9rem; color: var(--faint); font-style: italic; margin: 0 0 0.4rem; padding-left: 0.9rem; border-left: 2px solid var(--line); }
 
 /* glossary — custom styled popup (no native title tooltip) */
