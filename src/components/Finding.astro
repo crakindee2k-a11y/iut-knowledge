@@ -31,6 +31,10 @@ function gloss(text) {
   <summary>
     <span class={`vdot ${f.verdict}`} title={f.verdict}></span>
     <span class="s-glance" set:html={gloss(f.glance || f.summary)}></span>
+    <span class="s-who" title={`found by ${handle(f.author)}`}>
+      <span class="s-dot">{initials(f.author)}</span>
+      <span class="s-handle">{handle(f.author)}</span>
+    </span>
     <span class="s-tags">
       <span class="f-id">{f.id}</span>
       {f.redact && <span class="badge redact">redact</span>}

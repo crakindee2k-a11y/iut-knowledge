@@ -40,10 +40,10 @@ const members = Object.entries(team.members);
         and the date it was checked. Facts everyone already knows from the rules aren't here.
       </p>
       <div class="stamp">
-        <span><b>{verifiedCount}</b> verified</span>
-        <span><b>{findings.length}</b> crucial findings</span>
-        <span><b>{knownCount}</b> known facts hidden</span>
-        <span><b>{team.team.phase1Deadline}</b> deadline</span>
+        <a href="#findings"><b>{verifiedCount}</b> verified</a>
+        <a href="#findings"><b>{findings.length}</b> crucial findings</a>
+        <a href="#protocol"><b>{knownCount}</b> known facts hidden</a>
+        <a href={`https://www.kaggle.com/competitions/${team.team.competitionSlug}`} target="_blank" rel="noopener"><b>{team.team.phase1Deadline}</b> deadline</a>
       </div>
     </div>
   </section>
