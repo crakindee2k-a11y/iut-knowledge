@@ -1,0 +1,11 @@
+title: "Team Knowledge — Bengali Hallucination"
+description: "Verified-fact base for team Make America Great Again"
+theme: jekyll-theme-cayman
+# Obscure-URL privacy: discourage indexing. GitHub Pages free tier is public.
+plugins:
+  - jekyll-relative-links
+relative_links:
+  enabled: true
+  collections: true
+include:
+  - KNOWLEDGE.md
