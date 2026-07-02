@@ -21,7 +21,7 @@ function gloss(text) {
     const re = new RegExp('(?<![\\w-])(' + escapeRe(t) + ')(?![\\w-])', 'i');
     out = out.replace(re, (m) => {
       used.add(t);
-      return '<abbr class="gloss" title="' + escapeAttr(glossary[t]) + '">' + m + '</abbr>';
+      return '<button type="button" class="gloss" data-def="' + escapeAttr(glossary[t]) + '" aria-label="' + escapeAttr(t + ': ' + glossary[t]) + '">' + m + '</button>';
     });
   }
   return out;

@@ -131,9 +131,29 @@ code, .mono { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size:
 .keyev { border-left: 3px solid var(--indigo); background: #faf9ff; border-radius: 0 10px 10px 0; padding: 0.75rem 1rem; margin: 0 0 0.9rem; font-size: 0.95rem; color: var(--ink); line-height: 1.6; }
 .caveat { font-size: 0.9rem; color: var(--faint); font-style: italic; margin: 0 0 0.4rem; padding-left: 0.9rem; border-left: 2px solid var(--line); }
 
-/* glossary */
-.gloss { font-style: normal; cursor: help; border-bottom: 2px dotted var(--indigo); transition: color .2s, background .2s; }
-.gloss:hover { color: var(--indigo); background: var(--indigo-soft); }
+/* glossary — custom styled popup (no native title tooltip) */
+.gloss { position: relative; font: inherit; font-style: normal; cursor: help; color: var(--indigo); background: none; border: none; border-bottom: 2px dotted var(--indigo); padding: 0; margin: 0; transition: background .2s; }
+.gloss:hover, .gloss:focus-visible { background: var(--indigo-soft); outline: none; }
+.gloss::before, .gloss::after { position: absolute; left: 50%; opacity: 0; visibility: hidden; transform: translate(-50%, 6px); transition: opacity .18s ease, transform .18s cubic-bezier(.2,.7,.2,1); pointer-events: none; z-index: 40; }
+.gloss::after {
+  content: attr(data-def);
+  bottom: calc(100% + 10px);
+  width: max-content; max-width: 280px;
+  background: var(--ink); color: #fff;
+  font-family: var(--sans); font-size: 13px; font-weight: 500; font-style: normal; line-height: 1.45; text-align: left; letter-spacing: 0;
+  padding: 10px 13px; border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(23,19,43,.28), 0 0 0 2px var(--indigo);
+  white-space: normal;
+}
+.gloss::before {
+  content: ""; bottom: calc(100% + 4px);
+  border: 6px solid transparent; border-top-color: var(--ink);
+  transform: translate(-50%, 6px);
+}
+.gloss:hover::before, .gloss:hover::after,
+.gloss:focus-visible::before, .gloss:focus-visible::after,
+.gloss.show::before, .gloss.show::after { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
+@media (max-width: 520px) { .gloss::after { max-width: 220px; } }
 
 /* nested technical layer */
 details.tech { border-top: 2px dashed var(--line); padding-top: 0.8rem; margin-top: 0.2rem; }

@@ -133,5 +133,22 @@ const members = Object.entries(team.members);
       toggle.setAttribute('aria-expanded', String(!open));
       toggle.textContent = open ? 'Expand all' : 'Collapse all';
     });
+
+    // Glossary: tap toggles the popup; also stop clicks inside a summary from
+    // opening/closing the finding. Tapping elsewhere dismisses.
+    document.querySelectorAll('.gloss').forEach((g) => {
+      g.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const wasOpen = g.classList.contains('show');
+        document.querySelectorAll('.gloss.show').forEach((x) => x.classList.remove('show'));
+        if (!wasOpen) g.classList.add('show');
+      });
+    });
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.gloss')) {
+        document.querySelectorAll('.gloss.show').forEach((x) => x.classList.remove('show'));
+      }
+    });
   </script>
 </Base>
