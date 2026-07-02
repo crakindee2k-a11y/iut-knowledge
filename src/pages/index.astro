@@ -73,7 +73,7 @@ const members = Object.entries(team.members);
       {byCat.map(({ cat, items }) => (
         <div class="cat-group" data-group={cat}>
           <p class="eyebrow" style="margin:1.6rem 0 0.8rem">{cat} · {items.length}</p>
-          {items.map((f) => <Finding f={f} />)}
+          {items.map((f, i) => <Finding f={f} i={i} />)}
         </div>
       ))}
     </div>

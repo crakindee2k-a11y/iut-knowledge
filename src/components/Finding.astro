@@ -1,7 +1,7 @@
 ---
 import team from '../data/team.json';
 import glossary from '../data/glossary.json';
-const { f } = Astro.props;
+const { f, i = 0 } = Astro.props;
 const members = team.members;
 const initials = (key) => (members[key]?.name || key).replace('@','').slice(0,2).toUpperCase();
 const handle = (key) => members[key]?.handle || `@${key}`;
@@ -27,7 +27,7 @@ function gloss(text) {
   return out;
 }
 ---
-<details class="finding" data-verdict={f.verdict} data-cat={f.category} id={f.id}>
+<details class="finding" data-verdict={f.verdict} data-cat={f.category} id={f.id} style={`--i:${i}`}>
   <summary>
     <span class={`vdot ${f.verdict}`} title={f.verdict}></span>
     <span class="s-glance" set:html={gloss(f.glance || f.summary)}></span>

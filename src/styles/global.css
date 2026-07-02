@@ -110,19 +110,28 @@ code, .mono { font-family: var(--mono); font-size: 0.82em; }
 .finding[data-verdict="contradicted"] { --verdict: var(--clay); }
 
 /* the always-visible glance row */
-.finding > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 0.7rem; padding: 0.85rem 1rem 0.85rem 1.1rem; }
+.finding { transition: border-color .25s ease, background .25s ease, transform .18s ease, box-shadow .25s ease; }
+.finding > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 0.7rem; padding: 0.85rem 1rem 0.85rem 1.1rem; transition: padding-left .2s ease; }
 .finding > summary::-webkit-details-marker { display: none; }
-.finding > summary:hover { background: rgba(255,255,255,0.02); }
-.vdot { width: 9px; height: 9px; border-radius: 50%; flex: none; background: var(--steel); }
+.finding > summary:hover { background: rgba(255,255,255,0.02); padding-left: 1.4rem; }
+.finding:hover { border-color: var(--verdict); box-shadow: -3px 0 0 -1px var(--verdict); }
+.vdot { width: 9px; height: 9px; border-radius: 50%; flex: none; background: var(--steel); position: relative; transition: transform .2s ease; }
+.finding > summary:hover .vdot { transform: scale(1.35); }
 .vdot.verified { background: var(--brass); } .vdot.unresolved { background: var(--sky); } .vdot.contradicted { background: var(--clay); }
+/* unresolved findings quietly pulse — they still need attention */
+.vdot.unresolved::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--sky); animation: pulse 2.4s ease-out infinite; }
+@keyframes pulse { 0% { transform: scale(1); opacity: .7; } 70%,100% { transform: scale(2.6); opacity: 0; } }
 .s-glance { font-family: var(--display); font-size: 1.02rem; font-weight: 500; color: var(--paper); line-height: 1.35; flex: 1; letter-spacing: -0.01em; }
 .s-tags { display: inline-flex; align-items: center; gap: 0.5rem; flex: none; }
 .finding > summary .f-id { font-family: var(--mono); font-size: 11px; color: var(--steel); }
 .finding > summary .f-ver { font-family: var(--mono); font-size: 11px; color: var(--brass); }
-.finding > summary::after { content: "+"; font-family: var(--mono); color: var(--steel); font-size: 1.1rem; flex: none; }
-.finding[open] > summary::after { content: "\2212"; }
+.finding > summary::after { content: "+"; font-family: var(--mono); color: var(--steel); font-size: 1.2rem; line-height: 1; flex: none; transition: transform .28s cubic-bezier(.2,.7,.2,1), color .2s ease; }
+.finding[open] > summary::after { transform: rotate(135deg); color: var(--brass); }
+.finding > summary:hover::after { color: var(--brass); }
 
 .f-inner { padding: 0 1.1rem 1.2rem 1.1rem; }
+.finding[open] .f-inner { animation: reveal .32s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes reveal { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 .f-meta { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin: 0.2rem 0 0.9rem; }
 .f-cat { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--paper-dim); border: 1px solid var(--line); border-radius: 999px; padding: 0.15rem 0.55rem; }
 .f-title { font-family: var(--body); font-size: 0.9rem; color: var(--steel); font-style: italic; }
@@ -131,8 +140,7 @@ code, .mono { font-family: var(--mono); font-size: 0.82em; }
 .why .lbl, .action .lbl, .cl .lbl { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--brass); display: block; margin-bottom: 0.3rem; }
 .action { margin: 0 0 0.9rem; padding: 0.7rem 0.9rem; border: 1px solid var(--brass-dim); border-radius: 6px; background: rgba(201,162,39,0.06); font-size: 0.95rem; color: var(--paper); }
 
-/* glossary term */
-.gloss { text-decoration: underline dotted var(--steel); text-underline-offset: 3px; cursor: help; }
+/* glossary term (styled below with animated underline) */
 
 /* nested technical layer */
 details.tech { border-top: 1px dashed var(--line); padding-top: 0.7rem; margin-top: 0.2rem; }
@@ -178,9 +186,22 @@ footer.site .wrap { display: flex; justify-content: space-between; gap: 1rem; fl
 
 /* ---- filter bar ---- */
 .filters { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.6rem; }
-.filters button { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--paper-dim); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 0.35rem 0.8rem; cursor: pointer; transition: border-color .15s, color .15s; }
-.filters button:hover { border-color: var(--brass-dim); }
-.filters button[aria-pressed="true"] { color: var(--brass); border-color: var(--brass); }
+.filters button { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--paper-dim); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 0.35rem 0.8rem; cursor: pointer; transition: border-color .18s, color .18s, background .18s, transform .12s; }
+.filters button:hover { border-color: var(--brass-dim); transform: translateY(-1px); }
+.filters button:active { transform: translateY(0) scale(.97); }
+.filters button[aria-pressed="true"] { color: var(--brass); border-color: var(--brass); background: rgba(201,162,39,0.08); }
 .filters .toggle-all { margin-left: auto; color: var(--brass); border-color: var(--brass-dim); }
+
+/* glossary term — underline grows on hover, definition feels earned */
+.gloss { text-decoration: none; cursor: help; background-image: linear-gradient(var(--steel), var(--steel)); background-repeat: no-repeat; background-position: 0 100%; background-size: 100% 1px; padding-bottom: 1px; transition: background-size .2s ease, color .2s ease; }
+.gloss:hover { background-image: linear-gradient(var(--brass), var(--brass)); background-size: 100% 2px; color: var(--brass); }
+
+/* staggered entrance — rows settle in on load, ledger being written */
+@media (prefers-reduced-motion: no-preference) {
+  .cat-group .finding { animation: settle .5s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--i, 0) * 60ms + 120ms); }
+  @keyframes settle { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  .cat-group .eyebrow { animation: fade .5s ease both; }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+}
 
 :focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; border-radius: 3px; }
