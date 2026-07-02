@@ -1,0 +1,82 @@
+---
+import team from '../data/team.json';
+const { f } = Astro.props;
+const members = team.members;
+const initials = (key) => {
+  const m = members[key];
+  const base = (m?.name || key).trim();
+  return base.replace('@','').slice(0,2).toUpperCase();
+};
+const handle = (key) => members[key]?.handle || `@${key}`;
+const author = members[f.author];
+const verifier = members[f.verifier];
+---
+<article class="finding" data-verdict={f.verdict} data-cat={f.category} id={f.id}>
+  <div class="f-top">
+    <span class="f-id">{f.id}</span>
+    <span class="f-cat">{f.category}</span>
+    <span class={`badge ${f.verdict}`}>{f.verdict}</span>
+    <span class="badge conf">{f.confidence}</span>
+    {f.critical && <span class="badge conf">critical</span>}
+    {f.redact && <span class="badge redact">redact</span>}
+    <span class="f-ver">v{f.version}</span>
+  </div>
+
+  <h3 set:html={f.title}></h3>
+  <p class="summary">{f.summary}</p>
+  <p class="body">{f.body}</p>
+
+  {f.evidence?.map((e) => (
+    <div class="evidence">
+      <blockquote>{e.quote}</blockquote>
+      <div class="cite">— <b>{e.source}</b> · {e.date}</div>
+    </div>
+  ))}
+
+  {f.action && (
+    <div class="action">
+      <span class="lbl">How to apply</span>
+      {f.action}
+    </div>
+  )}
+
+  <div class="attrib">
+    <span class="who">
+      <span class="dot">{initials(f.author)}</span>
+      <span class="lbl">found</span>
+      <span class="h">{handle(f.author)}</span>
+    </span>
+    <span class="who">
+      <span class="dot v">{initials(f.verifier)}</span>
+      <span class="lbl">verified</span>
+      <span class="h">{handle(f.verifier)}</span>
+    </span>
+    {f.mentions?.length > 0 && (
+      <span class="who mentions">
+        <span class="lbl">cc</span>
+        {f.mentions.map((m, i) => (
+          <span>{handle(m)}{i < f.mentions.length - 1 ? ', ' : ''}</span>
+        ))}
+      </span>
+    )}
+    <span class="who" style="margin-left:auto">
+      <span class="lbl">updated</span>
+      <span class="h">{f.updated}</span>
+    </span>
+  </div>
+
+  {f.changelog?.length > 0 && (
+    <details class="changelog">
+      <summary>Changelog · {f.changelog.length} {f.changelog.length === 1 ? 'entry' : 'entries'}</summary>
+      <ol>
+        {[...f.changelog].reverse().map((c) => (
+          <li>
+            <span class="v">v{c.version}</span>
+            <span class="d">{c.date}</span>
+            <span class="note">{c.note}</span>
+          </li>
+        ))}
+      </ol>
+    </details>
+  )}
+</article>

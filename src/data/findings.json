@@ -1,0 +1,218 @@
+{
+  "$schema": "./findings.schema.md",
+  "findings": [
+    {
+      "id": "F-001",
+      "title": "Public leaderboard scores on macro-F1",
+      "category": "Metric",
+      "verdict": "verified",
+      "confidence": "HIGH",
+      "critical": true,
+      "redact": true,
+      "version": 2,
+      "author": "deen",
+      "verifier": "deen",
+      "mentions": ["nazmul"],
+      "created": "2026-07-02",
+      "updated": "2026-07-02",
+      "summary": "The public leaderboard is scored on macro-F1, confirmed empirically by probing an all-0 submission.",
+      "body": "We submitted an all-0 prediction (every row = hallucinated) as a probe. It returned public_score 0.314. For all-0, macro-F1 = 2·frac0/(1+frac0)/2; at sample base rate frac0 = 136/299 = 0.4548 this predicts 0.3126 — a decisive match. The competing hypothesis (binary-F1 on the hallucinated class) predicts 0.6253 for all-0, which is ruled out for the public LB.",
+      "evidence": [
+        { "quote": "\"public_score\": \"0.314\"", "source": "Kaggle submission ref 54249362", "date": "2026-07-02" },
+        { "quote": "predicted all-0 score if metric=macro-F1 : 0.3126", "source": "local derivation (python)", "date": "2026-07-02" }
+      ],
+      "changelog": [
+        { "version": 1, "date": "2026-07-02", "note": "Initial: public LB = macro-F1, binary-F1 hypothesis ruled out." },
+        { "version": 2, "date": "2026-07-02", "note": "Scoped claim to PUBLIC LB only after anti-hallucination pass surfaced that rules §7 asserts binary-F1-on-label0 governs private LB + Phase-2. See F-002." }
+      ]
+    },
+    {
+      "id": "F-002",
+      "title": "Private LB / Phase-2 metric is unresolved",
+      "category": "Metric",
+      "verdict": "unresolved",
+      "confidence": "LOW",
+      "critical": true,
+      "redact": true,
+      "version": 1,
+      "author": "deen",
+      "verifier": "deen",
+      "mentions": [],
+      "created": "2026-07-02",
+      "updated": "2026-07-02",
+      "summary": "The private leaderboard and Phase-2 held-out run may use binary-F1 on the hallucinated class, not macro-F1. Untestable before the private reveal.",
+      "body": "The Evaluation tab says macro-F1. Rules §7 says the primary metric is binary F1 on the hallucinated class (label=0), computed over the private leaderboard rows for Phase-1 final scoring and over the held-out fold for the Phase-2 organizer run (50% of final score). The public LB is provably macro-F1 (see F-001), but the private/Phase-2 metric cannot be tested now. A model tuned for balanced macro-F1 can rank differently under binary-F1-on-label0, which rewards label-0 recall.",
+      "evidence": [
+        { "quote": "Primary metric: binary F1 on the HALLUCINATED class (label = 0) ... over the private leaderboard rows only for Phase 1 final scoring, and over the held-out fold for the Phase 2 organizer run.", "source": "Competition Rules §7", "date": "2026-07-02" },
+        { "quote": "Submissions are evaluated on macro-F1 score.", "source": "Competition Evaluation page", "date": "2026-07-02" }
+      ],
+      "action": "Track BOTH metrics locally on the 299 samples. Optimize public submissions for macro-F1 but keep a label-0-recall-leaning variant. Of the 2 allowed final submissions, consider hedging one toward each metric.",
+      "changelog": [
+        { "version": 1, "date": "2026-07-02", "note": "Logged the macro-F1 vs binary-F1 split between the Evaluation tab and Rules §7." }
+      ]
+    },
+    {
+      "id": "F-003",
+      "title": "Label convention: 0 = hallucinated, 1 = faithful",
+      "category": "Data",
+      "verdict": "verified",
+      "confidence": "HIGH",
+      "critical": true,
+      "redact": false,
+      "version": 1,
+      "author": "deen",
+      "verifier": "deen",
+      "mentions": [],
+      "created": "2026-07-02",
+      "updated": "2026-07-02",
+      "summary": "label=0 means the response contains a hallucination; label=1 means it is faithful.",
+      "body": "Confirmed from the data-description page. This is the target polarity for every submission.",
+      "evidence": [
+        { "quote": "label = 0 — The response contains a hallucination ... label = 1 — The response is faithful/non-hallucinated.", "source": "Competition data-description page", "date": "2026-07-02" }
+      ],
+      "changelog": [
+        { "version": 1, "date": "2026-07-02", "note": "Initial." }
+      ]
+    },
+    {
+      "id": "F-004",
+      "title": "Sample set is 299 rows; 56% NULL-context",
+      "category": "Data",
+      "verdict": "verified",
+      "confidence": "HIGH",
+      "critical": false,
+      "redact": false,
+      "version": 1,
+      "author": "deen",
+      "verifier": "deen",
+      "mentions": [],
+      "created": "2026-07-02",
+      "updated": "2026-07-02",
+      "summary": "dataset_samples.json has 299 labeled rows; 169 (56%) have context = [NULL]. Base rate frac(label=0) = 0.4548.",
+      "body": "Label split by context type: CTX(0=47, 1=83), NULL(0=89, 1=80). The sample is a validation set, not a training set — too small to fit a supervised model without overfitting.",
+      "evidence": [
+        { "quote": "rows 299 ... null-ctx rows 169 / 299", "source": "local (python)", "date": "2026-07-02" },
+        { "quote": "('CTX',0) 47 ('CTX',1) 83 ('NULL',0) 89 ('NULL',1) 80", "source": "local (python)", "date": "2026-07-02" }
+      ],
+      "changelog": [
+        { "version": 1, "date": "2026-07-02", "note": "Initial." }
+      ]
+    },
+    {
+      "id": "F-005",
+      "title": "Test set is 2516 rows; 46% NULL-context",
+      "category": "Data",
+      "verdict": "verified",
+      "confidence": "HIGH",
+      "critical": false,
+      "redact": false,
+      "version": 1,
+      "author": "deen",
+      "verifier": "deen",
+      "mentions": [],
+      "created": "2026-07-02",
+      "updated": "2026-07-02",
+      "summary": "test_set.csv has 2516 rows with columns id, context, prompt_bn, response_bn; 1155 (46%) are NULL-context. ids run 1..2516.",
+      "body": "sample_submission.csv is all label=1 across 2516 rows — a naive all-faithful baseline.",
+      "evidence": [
+        { "quote": "rows 2516 ... null-ctx 1155 / 2516", "source": "local (python)", "date": "2026-07-02" }
+      ],
+      "changelog": [
+        { "version": 1, "date": "2026-07-02", "note": "Initial." }
+      ]
+    },
+    {
+      "id": "F-006",
+      "title": "No cached frontier outputs or band labels in the download",
+      "category": "Data",
+      "verdict": "verified",
+      "confidence": "HIGH",
+      "critical": false,
+      "redact": false,
+      "version": 1,
+      "author": "deen",
+      "verifier": "deen",
+      "mentions": [],
+      "created": "2026-07-02",
+      "updated": "2026-07-02",
+      "summary": "Only 3 data files exist. The rules reference cached frontier outputs and a C1 cultural-distance subset, but neither is in the download.",
+      "body": "list_competition_data_files returns only dataset_samples.json, test_set.csv, sample_submission.csv. The sample rows carry only [context, prompt_bn, response_bn, label] — no cached-output column, no band label. The C1 tie-breaker subset is therefore latent and cannot be directly optimized.",
+      "evidence": [
+        { "quote": "keys ['context', 'prompt_bn', 'response_bn', 'label']", "source": "local (python)", "date": "2026-07-02" }
+      ],
+      "changelog": [
+        { "version": 1, "date": "2026-07-02", "note": "Initial." }
+      ]
+    },
+    {
+      "id": "F-007",
+      "title": "Two disjoint subproblems, routed on context == [NULL]",
+      "category": "Strategy",
+      "verdict": "verified",
+      "confidence": "MEDIUM",
+      "critical": false,
+      "redact": false,
+      "version": 1,
+      "author": "deen",
+      "verifier": "deen",
+      "mentions": ["nazmul"],
+      "created": "2026-07-02",
+      "updated": "2026-07-02",
+      "summary": "Intrinsic (context present, ~54% of test) is an NLI/grounding check. Extrinsic (NULL context, ~46%) is closed-book Bangladesh world knowledge.",
+      "body": "Route each row on whether context is [NULL]. Intrinsic rows ask whether response_bn is grounded in the given context — tractable with open-weight encoders (BanglaBERT, XLM-R). Extrinsic rows have no passage and need a Bengali-knowledgeable model; this is the hard band where the headline phenomenon and heaviest metric weight concentrate.",
+      "evidence": [
+        { "quote": "the heaviest weight on the culturally-situated band where the headline phenomenon concentrates", "source": "Competition Description page", "date": "2026-07-02" }
+      ],
+      "changelog": [
+        { "version": 1, "date": "2026-07-02", "note": "Initial routing hypothesis." }
+      ]
+    },
+    {
+      "id": "F-008",
+      "title": "Phase-2 is offline, open-weight only, <9h, <50GB",
+      "category": "Rules",
+      "verdict": "verified",
+      "confidence": "HIGH",
+      "critical": true,
+      "redact": false,
+      "version": 1,
+      "author": "deen",
+      "verifier": "deen",
+      "mentions": [],
+      "created": "2026-07-02",
+      "updated": "2026-07-02",
+      "summary": "Phase-2 code runs offline in a Kaggle kernel with no internet, open-weight models only, under 9 hours on P100 or 2×T4, under 50 GB of weights.",
+      "body": "Phase-1 may use paid APIs only if the same predictions can be reproduced offline; otherwise the team cannot advance to Phase-2, which carries 50% of the final score. This forces the hybrid strategy: API for silver-labeling data only, never at inference.",
+      "evidence": [
+        { "quote": "All Phase 2 code runs offline in Kaggle's kernel environment with no internet access. Open-weight models only ... under 9 hours ... on a single P100 or 2×T4 GPU ... under 50 GB of on-disk weights.", "source": "Competition Rules §4", "date": "2026-07-02" }
+      ],
+      "changelog": [
+        { "version": 1, "date": "2026-07-02", "note": "Initial." }
+      ]
+    },
+    {
+      "id": "F-009",
+      "title": "Leaderboard standing (2026-07-02)",
+      "category": "Leaderboard",
+      "verdict": "verified",
+      "confidence": "HIGH",
+      "critical": false,
+      "redact": true,
+      "version": 1,
+      "author": "deen",
+      "verifier": "deen",
+      "mentions": ["nazmul"],
+      "created": "2026-07-02",
+      "updated": "2026-07-02",
+      "summary": "Top public score is 0.814 (DU_Fanta); our only real submission (N1.csv heuristic) scored 0.560.",
+      "body": "Top of board: DU_Fanta 0.814, BUET_NeuralX 0.790, Huntrix 0.742, with a cluster at 0.66–0.81. Our team's N1.csv heuristic sits at 0.560.",
+      "evidence": [
+        { "quote": "\"team_name\": \"DU_Fanta\" ... \"score\": \"0.814\"", "source": "Kaggle get_competition_leaderboard", "date": "2026-07-02" },
+        { "quote": "\"file_name\": \"N1.csv\",\"public_score\": \"0.560\"", "source": "Kaggle search_competition_submissions", "date": "2026-07-02" }
+      ],
+      "changelog": [
+        { "version": 1, "date": "2026-07-02", "note": "Snapshot at 2026-07-02." }
+      ]
+    }
+  ]
+}

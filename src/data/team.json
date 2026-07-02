@@ -1,0 +1,38 @@
+{
+  "team": {
+    "name": "Make America Great Again",
+    "competition": "অলীকবচন · Bengali LLM Hallucination Detection Challenge",
+    "competitionSlug": "bengali-hallucination",
+    "phase1Deadline": "2026-07-19"
+  },
+  "members": {
+    "deen": {
+      "handle": "@deen",
+      "name": "Deen Mohammed",
+      "kaggle": "deenmohammed",
+      "role": "Pipeline / verification",
+      "placeholder": true
+    },
+    "nazmul": {
+      "handle": "@nazmul",
+      "name": "Nazmul",
+      "kaggle": "nazmul1005",
+      "role": "Baseline / submissions",
+      "placeholder": true
+    },
+    "member3": {
+      "handle": "@member3",
+      "name": "Teammate 3",
+      "kaggle": "",
+      "role": "TBD",
+      "placeholder": true
+    },
+    "member4": {
+      "handle": "@member4",
+      "name": "Teammate 4",
+      "kaggle": "",
+      "role": "TBD",
+      "placeholder": true
+    }
+  }
+}

@@ -1,0 +1,133 @@
+---
+import Base from '../layouts/Base.astro';
+import Finding from '../components/Finding.astro';
+import data from '../data/findings.json';
+import team from '../data/team.json';
+
+const findings = data.findings;
+const verifiedCount = findings.filter((f) => f.verdict === 'verified').length;
+const categories = [...new Set(findings.map((f) => f.category))];
+const byCat = categories.map((c) => ({ cat: c, items: findings.filter((f) => f.category === c) }));
+const redactCount = findings.filter((f) => f.redact).length;
+const members = Object.entries(team.members);
+---
+<Base title="অলীকবচন Ledger — Verified Findings">
+  <header class="masthead">
+    <div class="wrap">
+      <div class="brand">
+        <span class="bn">অলীকবচন</span>
+        <span class="en">Ledger</span>
+      </div>
+      <nav>
+        <a href="#findings">Findings</a>
+        <a href="#team">Team</a>
+        <a href="#protocol">Protocol</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Team Make America Great Again · Internal</p>
+      <h1>What we know, and <span class="accent">how we know it</span>.</h1>
+      <p class="lede">
+        A shared ledger of verified findings for the Bengali LLM Hallucination Detection
+        Challenge. Every entry carries a verdict, a verbatim quote from the source that
+        proves it, and the date it was checked. If it is not verified, it is not here.
+      </p>
+      <div class="stamp">
+        <span><b>{verifiedCount}</b> verified</span>
+        <span><b>{findings.length}</b> total findings</span>
+        <span>Phase-1 deadline <b>{team.team.phase1Deadline}</b></span>
+      </div>
+      <div class="tally" aria-hidden="true">
+        {findings.map((f, i) => (
+          <span
+            class="bar"
+            style={`width:${100 / findings.length}%; animation-delay:${i * 70}ms; background:${f.verdict === 'verified' ? 'var(--brass)' : f.verdict === 'unresolved' ? 'var(--sky)' : 'var(--clay)'}`}
+          ></span>
+        ))}
+        <span class="n">{verifiedCount}/{findings.length} confirmed</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="findings">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Findings</h2>
+        <span class="count">{findings.length} entries · {categories.length} categories</span>
+      </div>
+
+      <div class="filters" role="group" aria-label="Filter findings by category">
+        <button data-filter="all" aria-pressed="true">All</button>
+        {categories.map((c) => <button data-filter={c} aria-pressed="false">{c}</button>)}
+      </div>
+
+      {byCat.map(({ cat, items }) => (
+        <div class="cat-group" data-group={cat}>
+          <p class="eyebrow" style="margin:1.6rem 0 0.8rem">{cat} · {items.length}</p>
+          {items.map((f) => <Finding f={f} />)}
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="section" id="team">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Team</h2>
+        <span class="count">{members.length} members · handles are placeholders</span>
+      </div>
+      <div class="roster">
+        {members.map(([key, m]) => (
+          <div class="member">
+            <div class="h">{m.handle}</div>
+            <div class="n">{m.name}</div>
+            <div class="r">{m.role}{m.kaggle ? ` · kaggle:${m.kaggle}` : ''}</div>
+            {m.placeholder && <div class="ph">placeholder — fix in team.json</div>}
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="protocol">
+    <div class="wrap">
+      <div class="section-head"><h2>Protocol</h2></div>
+      <p class="body" style="max-width:60ch;color:var(--paper-dim)">
+        Findings are added only after an anti-hallucination check: a verdict, a verbatim
+        evidence quote, and a date. Nothing auto-publishes — entries live in
+        <code>src/data/findings.json</code> and go live only when approved and pushed.
+        Corrections bump the version and append to that finding's changelog rather than
+        overwriting history.
+      </p>
+      {redactCount > 0 && (
+        <div class="redact-note">
+          ⚠ {redactCount} finding{redactCount === 1 ? '' : 's'} tagged <b>redact</b> — competitive
+          edge. This site is public (unlisted, noindex). Strip redacted entries before sharing
+          the URL beyond the team.
+        </div>
+      )}
+    </div>
+  </section>
+
+  <footer class="site">
+    <div class="wrap">
+      <span>অলীকবচন Ledger · {team.team.name}</span>
+      <span>verified-only · noindex · built with Astro</span>
+    </div>
+  </footer>
+
+  <script is:inline>
+    const btns = document.querySelectorAll('.filters button');
+    const groups = document.querySelectorAll('.cat-group');
+    btns.forEach((b) => b.addEventListener('click', () => {
+      const f = b.dataset.filter;
+      btns.forEach((x) => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+      groups.forEach((g) => {
+        g.style.display = (f === 'all' || g.dataset.group === f) ? '' : 'none';
+      });
+    }));
+  </script>
+</Base>
