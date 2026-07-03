@@ -336,6 +336,40 @@
         }
       ],
       "tier": "known"
+    },
+    {
+      "id": "F-011",
+      "title": "BanglaBERT-NLI signal for CTX-band detection: killed, near-collapsed on held-out fold",
+      "category": "Strategy",
+      "verdict": "verified",
+      "confidence": "HIGH",
+      "critical": true,
+      "redact": false,
+      "tier": "known",
+      "version": 1,
+      "author": "deen",
+      "verifier": "deen",
+      "mentions": [
+        "deen"
+      ],
+      "created": "2026-07-03",
+      "updated": "2026-07-03",
+      "summary": "Using our xnli_bn-fine-tuned BanglaBERT as an NLI signal (premise=context, hyp=response) for the CTX band collapses to near-constant 'faithful' and underperforms the lexical-overlap baseline in every ensemble combination; do not retry this approach.",
+      "body": "Applied the BanglaBERT model from F-010 (fine-tuned on xnli_bn, verified to reproduce BUET's benchmark) as a zero-shot NLI signal for our CTX-band detector: premise=context, hypothesis=response_bn, faithful iff prediction != contradiction. Measured on our own 40-row CTX held-out fold (never used for any tuning, zero leakage). Results: NLI-only macroF1=0.4265 (binF1_0=0.1111) vs the lexical-overlap baseline's macroF1=0.7802 (binF1_0=0.7143) on the same fold. The NLI head predicts faithful(1) on 37/40 rows regardless of ground truth (near-total collapse to one class). Combining with lexical made things worse in both directions: AND-ensemble (faithful only if both signals agree) macroF1=0.7333, still below lexical-only; OR-ensemble (faithful if either signal says so) macroF1=0.4531, binF1_0 collapses to 0.1250 as NLI's false-faithful predictions flood through. True label distribution on this fold: 0=15, 1=25. Working hypothesis (not measured, inferred): xnli_bn's premise/hypothesis pairs are full sentences, while our dataset's responses are short 2-5 token answers (per earlier EDA) -- the 3-way sentence-level NLI skill likely doesn't transfer to this short-answer verification framing. Decision: do not use this BanglaBERT-NLI approach or any lexical+NLI ensemble for the CTX band; lexical-overlap alone remains the pick. mDeBERTa-v3-base-mnli-xnli zero-shot NLI is a separate, still-untested idea and is not ruled out by this result.",
+      "evidence": [
+        {
+          "quote": "NLI-only macroF1=0.4265, binF1_0=0.1111; lexical-only macroF1=0.7802, binF1_0=0.7143; AND-ensemble macroF1=0.7333; OR-ensemble macroF1=0.4531, binF1_0=0.1250; pred dist p_nli: 0=3/1=37 (n=40); true dist y: 0=15/1=25",
+          "source": "computed from kernels/banglabert_nli/banglabert-nli-ctx.ipynb STAGE 2 output (banglabert_ctx_heldout_results.json), 40-row held-out fold, 2xT4 Kaggle run",
+          "date": "2026-07-03"
+        }
+      ],
+      "changelog": [
+        {
+          "version": 1,
+          "date": "2026-07-03",
+          "note": "Initial."
+        }
+      ]
     }
   ]
 }
