@@ -306,16 +306,16 @@
       "confidence": "HIGH",
       "critical": false,
       "redact": true,
-      "version": 1,
+      "version": 2,
       "author": "deen",
       "verifier": "deen",
       "mentions": [
         "nazmul"
       ],
       "created": "2026-07-02",
-      "updated": "2026-07-02",
-      "summary": "Top public score is 0.814 (DU_Fanta); our only real submission (N1.csv heuristic) scored 0.560.",
-      "body": "Top of board: DU_Fanta 0.814, BUET_NeuralX 0.790, Huntrix 0.742, with a cluster at 0.66–0.81. Our team's N1.csv heuristic sits at 0.560.",
+      "updated": "2026-07-03",
+      "summary": "As of 2026-07-03: top public score 0.908 (Outlier_Alliance), #3 cutoff ~0.883 (CUET_AL_Masaar); #4 DU_Fanta 0.868, #5 SUST_HIRE 0.829. Our best real submission scored 0.722. Board is climbing fast (top was 0.814 on 2026-07-02).",
+      "body": "Live leaderboard 2026-07-03T08:00Z: 1) Outlier_Alliance 0.908, 2) r=0 0.905, 3) CUET_AL_Masaar 0.883, 4) DU_Fanta 0.868, 5) SUST_HIRE 0.829. Our team best = 0.722 (see F-012). Gap to top-3 has WIDENED from ~0.108 to ~0.161 in one day as the field improved. The 0.830 top-3 figure cited earlier this session is already stale.",
       "evidence": [
         {
           "quote": "\"team_name\": \"DU_Fanta\" ... \"score\": \"0.814\"",
@@ -326,6 +326,11 @@
           "quote": "\"file_name\": \"N1.csv\",\"public_score\": \"0.560\"",
           "source": "Kaggle search_competition_submissions",
           "date": "2026-07-02"
+        },
+        {
+          "quote": "Outlier_Alliance 0.908 / r=0 0.905 / CUET_AL_Masaar 0.883 / DU_Fanta 0.868 / SUST_HIRE 0.829",
+          "source": "Kaggle get_competition_leaderboard bengali-hallucination",
+          "date": "2026-07-03"
         }
       ],
       "changelog": [
@@ -333,6 +338,11 @@
           "version": 1,
           "date": "2026-07-02",
           "note": "Snapshot at 2026-07-02."
+        },
+        {
+          "version": 2,
+          "date": "2026-07-03",
+          "note": "Refresh to live 2026-07-03 standing: top 0.814->0.908, top-3 cutoff ~0.830->0.883, our best now 0.722 (was 0.560). Board climbing fast."
         }
       ],
       "tier": "known"
