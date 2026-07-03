@@ -370,6 +370,147 @@
           "note": "Initial."
         }
       ]
+    },
+    {
+      "id": "F-012",
+      "title": "Our routed pipeline scored 0.722 public LB — below leaked local estimate and teammate baseline (validation leakage)",
+      "category": "Strategy",
+      "verdict": "verified",
+      "confidence": "HIGH",
+      "critical": true,
+      "redact": true,
+      "tier": "crucial",
+      "version": 1,
+      "author": "deen",
+      "verifier": "deen",
+      "mentions": [],
+      "created": "2026-07-03",
+      "updated": "2026-07-03",
+      "summary": "Lexical-CTX + Qwen3-32B-NULL blend scored 0.722 on the public LB; our own local estimate was 0.7665 and a teammate baseline was 0.732 — both higher than the real result. Root cause: CTX threshold and NULL-judge accuracy were both tuned AND measured on the same 299-row sample (no held-out split), inflating local numbers.",
+      "body": "Diagnosed by comparing the leaked local blend (0.7665 macroF1, tuned+measured on the same 299 rows) against the actual public LB (0.722). The test set is MORE CTX-heavy than the sample (54% vs 43%), and CTX scores higher than NULL, so a naive projection should have put us ABOVE the sample estimate (~0.784), not below — the fact that the real score came in at 0.722 points to overfitting the tuning to the sample, not an unlucky band mix. Fix adopted going forward: a 70/30 stratified train/held-out split (by label, within each band) so every reported number is measured on rows never used for tuning.",
+      "evidence": [
+        {
+          "quote": "actual LB 0.722, under teammate 0.732 - confirms overfitting",
+          "source": "docs/results.csv row lexical085_CTX_plus_qwen3-32b_NULL",
+          "date": "2026-07-03"
+        }
+      ],
+      "changelog": [
+        {
+          "version": 1,
+          "date": "2026-07-03",
+          "note": "Session 2026-07-03: post-mortem of first real LB submission."
+        }
+      ],
+      "glance": "Our best pipeline scored 0.722 on the real leaderboard — lower than our own local estimate claimed, and below a teammate's earlier 0.732.",
+      "why": "It proves local scores measured on the same rows you tuned on are inflated. Any teammate who trusts a local number without a held-out split will overestimate their real leaderboard score.",
+      "keyEvidence": "Leaked local estimate was 0.7665 macro-F1; the actual public LB came in at 0.722 — a ~0.045 drop, landing under the 0.732 baseline.",
+      "caveat": "The 0.722 is a real LB number (high confidence). 'Leakage' as the cause is strongly supported by the direction of the gap but the exact per-band contribution to the drop was not isolated."
+    },
+    {
+      "id": "F-013",
+      "title": "Honest held-out CTX-band score is 0.7802 macroF1 (lexical overlap >=0.85), down from 0.8563 leaked",
+      "category": "Strategy",
+      "verdict": "verified",
+      "confidence": "HIGH",
+      "critical": true,
+      "redact": true,
+      "tier": "known",
+      "version": 1,
+      "author": "deen",
+      "verifier": "deen",
+      "mentions": [],
+      "created": "2026-07-03",
+      "updated": "2026-07-03",
+      "summary": "Lexical token-overlap (>=0.85 => faithful) on the CTX band scores 0.7802 macroF1 on a 40-row held-out fold never used to pick the threshold — the true generalization number. The previously-cited 0.8563 was leaked (threshold tuned and scored on the same rows).",
+      "body": "The 0.85 overlap threshold was re-chosen on a 90-row CTX train fold, then scored once on a disjoint 40-row held-out fold: macroF1=0.7802, binF1_0=0.7143. This 0.7802 is the real bar any CTX-band replacement must beat. Lexical-only remains the CTX pick; the BanglaBERT-NLI ensemble attempt (F-011) failed to beat it.",
+      "evidence": [
+        {
+          "quote": "HONEST: thr chosen on 90-row CTX train fold, scored on 40-row held-out never used for tuning; down from leaked 0.8563",
+          "source": "docs/results.csv row lexical085_CTX_heldout",
+          "date": "2026-07-03"
+        }
+      ],
+      "changelog": [
+        {
+          "version": 1,
+          "date": "2026-07-03",
+          "note": "Session 2026-07-03: honest held-out re-measurement of CTX baseline."
+        }
+      ]
+    },
+    {
+      "id": "F-014",
+      "title": "NULL-band Qwen3-32B judge: 0.63 macroF1 held-out; thinking-mode beats non-thinking by +0.014",
+      "category": "Strategy",
+      "verdict": "verified",
+      "confidence": "MEDIUM",
+      "critical": true,
+      "redact": true,
+      "tier": "crucial",
+      "version": 2,
+      "author": "deen",
+      "verifier": "deen",
+      "mentions": [],
+      "created": "2026-07-03",
+      "updated": "2026-07-03",
+      "summary": "Qwen3-32B-AWQ as a zero-shot NULL-band factuality judge scores macroF1=0.6269 (binF1_0=0.6415) on a 51-row held-out fold with thinking-mode ON, vs 0.6126 (binF1_0=0.5366) with thinking OFF — same 51 rows. Thinking-mode wins by +0.0143 macroF1 / +0.105 binF1_0, a small but consistent edge on both metrics.",
+      "body": "Isolated A/B on an identical 51-row held-out NULL fold (never used for tuning). enable_thinking=True (max_tokens=512, temp=0.6/top_p=0.95) vs enable_thinking=False (max_tokens=8). The direction is consistent with arxiv 2509.13332 (thinking judges beat non-thinking ~10pp), though that paper only tested Qwen3 at 0.6B/1.7B/4B, not 32B — our observed edge is far smaller than 10pp. NULL band caps well below CTX: even frontier models hit only ~73% on Bangladeshi cultural knowledge (BLUCK), so this band is inherently the ceiling-limiter for the whole pipeline.",
+      "evidence": [
+        {
+          "quote": "thinking-mode wins +0.0143 macroF1/+0.1049 binF1_0 over nonthinking",
+          "source": "docs/results.csv rows qwen3-32b_NULL_thinking_heldout vs qwen3-32b_NULL_nonthinking_heldout",
+          "date": "2026-07-03"
+        }
+      ],
+      "changelog": [
+        {
+          "version": 1,
+          "date": "2026-07-03",
+          "note": "Session 2026-07-03: held-out NULL judge measurement + thinking-mode A/B."
+        },
+        {
+          "version": 2,
+          "date": "2026-07-03",
+          "note": "Promote to crucial tier for human site per team decision; added plain-language layer."
+        }
+      ],
+      "glance": "Our no-context (world-knowledge) detector tops out around 0.63 — this band, not the context band, is what caps our whole score.",
+      "why": "Effort spent improving the context band is wasted if the NULL band stays at 0.63; the ceiling on our leaderboard score lives here. Also: turning on the model's thinking mode gives a small but free gain, so keep it on.",
+      "keyEvidence": "Qwen3-32B judge on a 51-row held-out fold: 0.6269 macroF1 with thinking on vs 0.6126 with it off — thinking wins on both metrics.",
+      "caveat": "51 rows is a small fold, so the +0.014 edge is real-direction but noisy in magnitude. The thinking-mode gain is far smaller than the ~10pp a cited paper reported (that paper only tested models up to 4B, not 32B)."
+    },
+    {
+      "id": "F-015",
+      "title": "BanglaBERT fine-tune on xnli_bn reproduces BUET's 82.80% NLI benchmark (pipeline sanity check)",
+      "category": "Data",
+      "verdict": "verified",
+      "confidence": "HIGH",
+      "critical": false,
+      "redact": false,
+      "tier": "known",
+      "version": 1,
+      "author": "deen",
+      "verifier": "deen",
+      "mentions": [],
+      "created": "2026-07-03",
+      "updated": "2026-07-03",
+      "summary": "Fine-tuning csebuetnlp/banglabert on the public xnli_bn dataset (381k rows) for 3 epochs reaches accuracy=0.8286, macroF1=0.8288 on xnli_bn's own test split — matching BUET's officially reported 82.80% NLI benchmark. Confirms the fine-tune pipeline (label mapping, tokenization, 2xT4 DDP) is correct.",
+      "body": "This is the STAGE-1 sanity check that validated the training harness before applying the model to the actual competition task. It matters as a NEGATIVE-RESULT companion to F-011: the fine-tune itself worked perfectly (matched the published benchmark), which is precisely why F-011's downstream failure is attributable to the NLI-framing/short-answer mismatch and NOT to a broken training run. xnli_bn is CC BY-NC-SA 4.0 (non-commercial research) and is separate from the competition's own labels.",
+      "evidence": [
+        {
+          "quote": "stage1 xnli_bn test sanity check acc=0.8286 macroF1=0.8288 (matches BUET 82.80% reported)",
+          "source": "docs/results.csv row banglabert_nli_only_CTX_heldout (note field) + /kaggle/working/stage1_metrics.json",
+          "date": "2026-07-03"
+        }
+      ],
+      "changelog": [
+        {
+          "version": 1,
+          "date": "2026-07-03",
+          "note": "Session 2026-07-03: was held back earlier, now published as part of full-session finding upload."
+        }
+      ]
     }
   ]
 }
