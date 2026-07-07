@@ -35,6 +35,7 @@ function gloss(text) {
     </span>
     <span class="s-glance" set:html={gloss(f.glance || f.summary)}></span>
     <span class="s-tags">
+      {f.hot && <span class="badge hot">🔥 hot read</span>}
       <span class={`badge ${f.verdict}`}>{f.verdict}</span>
       {f.redact && <span class="badge redact">redact</span>}
       <span class="f-id">{f.id}</span>

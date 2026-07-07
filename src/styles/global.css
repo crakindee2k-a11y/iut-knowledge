@@ -89,6 +89,7 @@ code, .mono { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size:
 .badge.contradicted { color: #fff; background: var(--pink); }
 .badge.conf { color: var(--dim); background: var(--card); border-color: var(--line); }
 .badge.redact { color: #fff; background: var(--pink); border-style: dashed; }
+.badge.hot { color: #fff; background: #d1341f; border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
 
 /* ---- finding: chunky bordered card, collapsed row ---- */
 .finding { background: var(--card); border: 2px solid var(--ink); border-radius: 16px; margin-bottom: 0.9rem; box-shadow: 4px 4px 0 rgba(36,26,23,0.12); transition: box-shadow .15s, transform .15s; }

@@ -306,15 +306,15 @@
       "confidence": "HIGH",
       "critical": false,
       "redact": true,
-      "version": 2,
+      "version": 3,
       "author": "deen",
       "verifier": "deen",
       "mentions": [
         "nazmul"
       ],
       "created": "2026-07-02",
-      "updated": "2026-07-03",
-      "summary": "As of 2026-07-03: top public score 0.908 (Outlier_Alliance), #3 cutoff ~0.883 (CUET_AL_Masaar); #4 DU_Fanta 0.868, #5 SUST_HIRE 0.829. Our best real submission scored 0.722. Board is climbing fast (top was 0.814 on 2026-07-02).",
+      "updated": "2026-07-07",
+      "summary": "Leaderboard standing (2026-07-07): our best proven public LB = 0.722; top-3 cutoff ~0.914; deadline 2026-07-19/20.",
       "body": "Live leaderboard 2026-07-03T08:00Z: 1) Outlier_Alliance 0.908, 2) r=0 0.905, 3) CUET_AL_Masaar 0.883, 4) DU_Fanta 0.868, 5) SUST_HIRE 0.829. Our team best = 0.722 (see F-012). Gap to top-3 has WIDENED from ~0.108 to ~0.161 in one day as the field improved. The 0.830 top-3 figure cited earlier this session is already stale.",
       "evidence": [
         {
@@ -343,6 +343,11 @@
           "version": 2,
           "date": "2026-07-03",
           "note": "Refresh to live 2026-07-03 standing: top 0.814->0.908, top-3 cutoff ~0.830->0.883, our best now 0.722 (was 0.560). Board climbing fast."
+        },
+        {
+          "version": 3,
+          "date": "2026-07-07",
+          "note": "refreshed stale 2026-07-02 snapshot to 2026-07-07 standing (0.722 proven; cutoff ~0.914)"
         }
       ],
       "tier": "known"
@@ -521,6 +526,211 @@
           "note": "Session 2026-07-03: was held back earlier, now published as part of full-session finding upload."
         }
       ]
+    },
+    {
+      "id": "F-016",
+      "title": "Small held-out folds (n=51/40) mispredict at scale — don't lock judge on them",
+      "category": "Strategy",
+      "verdict": "verified",
+      "confidence": "HIGH",
+      "critical": false,
+      "redact": true,
+      "tier": "crucial",
+      "version": 2,
+      "author": "deen",
+      "verifier": "deen",
+      "mentions": [],
+      "created": "2026-07-07",
+      "updated": "2026-07-07",
+      "summary": "TigerLLM+promptC won the 51-row NULL held-out (0.764 vs Qwen 0.627) but REGRESSED on the full leaderboard (0.690 vs 0.722) — ranking reversed at scale.",
+      "body": "We tuned the NULL judge on a 51-row held-out fold where TigerLLM-9B + a prompt reframe scored macroF1 0.764 vs Qwen3-32B 0.627, swapped the judge, and submitted. Full-test (2516 rows) leaderboard came back 0.690 — a regression from the proven 0.722 Qwen blend. CTX band was identical in both runs, so the whole delta is the judge swap. n=51 gives a 95pct CI half-width of ~0.14, so that gap was noise.",
+      "evidence": [
+        {
+          "quote": "TigerLLM+C scored 0.690 vs 0.722 Qwen baseline; held-out ranked it 0.764 vs 0.627",
+          "source": "Kaggle leaderboard + kernel_null_bias_calib_probe.py",
+          "date": "2026-07-07"
+        }
+      ],
+      "changelog": [
+        {
+          "version": 1,
+          "date": "2026-07-07",
+          "note": "Initial."
+        },
+        {
+          "version": 2,
+          "date": "2026-07-07",
+          "note": "tagged hot read — decision-critical"
+        }
+      ],
+      "action": "Treat small-fold wins as directional only. Validate judge/model changes on the full leaderboard before locking. Keep proven leaderboard-best as submission fallback.",
+      "glance": "A model that wins on our tiny 51-row test can LOSE on the real leaderboard — it just happened and cost points.",
+      "why": "We nearly locked a worse judge because a 51-row fold said it was better. Any model/judge/threshold pick on the small folds is a guess until the leaderboard confirms it.",
+      "keyEvidence": "TigerLLM+C: 0.764 on 51-row held-out but 0.690 on full 2516-row leaderboard; Qwen baseline 0.722. Ranking flipped.",
+      "caveat": "Shows the fold is unreliable for SELECTION; does not prove TigerLLM useless, just unproven at scale. n=51 CI ~+/-0.14.",
+      "hot": true
+    },
+    {
+      "id": "F-017",
+      "title": "NULL judge: Qwen3-32B-thinking is proven best; TigerLLM+promptC falsified at scale",
+      "category": "Strategy",
+      "verdict": "verified",
+      "confidence": "HIGH",
+      "critical": false,
+      "redact": true,
+      "tier": "crucial",
+      "version": 2,
+      "author": "deen",
+      "verifier": "deen",
+      "mentions": [
+        "nazmul"
+      ],
+      "created": "2026-07-07",
+      "updated": "2026-07-07",
+      "summary": "Qwen3-32B-AWQ thinking-mode is the proven NULL judge (part of the 0.722 blend). TigerLLM-9B+promptC looked better on held-out but scored 0.690 on the full leaderboard.",
+      "body": "The prompt reframe 'could this answer be fabricated/wrong?' (vs 'is it correct?') fixed a faithful-bias on the 51-row NULL fold (0.66 to 0.76) but did NOT generalize: full-test 0.690 vs Qwen 0.722. Revert the NULL judge to Qwen3-32B-thinking to recover 0.722. Prompt C / TigerLLM stay as UNPROVEN experiments, not the submission judge.",
+      "evidence": [
+        {
+          "quote": "TigerLLM+C full-test 0.690 vs Qwen blend 0.722",
+          "source": "Kaggle leaderboard",
+          "date": "2026-07-07"
+        }
+      ],
+      "changelog": [
+        {
+          "version": 1,
+          "date": "2026-07-07",
+          "note": "Initial."
+        },
+        {
+          "version": 2,
+          "date": "2026-07-07",
+          "note": "tagged hot read — decision-critical"
+        }
+      ],
+      "action": "Keep Qwen3-32B-thinking as the NULL judge in the submission kernel. Revert the 0.690 submission.",
+      "glance": "Use Qwen3-32B (thinking mode) as the NULL-band judge. The TigerLLM prompt trick that looked great locally lost on the real board.",
+      "why": "Picking the NULL judge is the single biggest pipeline lever; getting it wrong cost us a regression. Qwen is the safe, proven choice.",
+      "keyEvidence": "0.722 blend uses Qwen3-32B-thinking; TigerLLM+C swap scored 0.690 full-test.",
+      "caveat": "Does not prove TigerLLM can't help via fine-tune later; only that zero-shot TigerLLM+promptC is not better than Qwen at scale.",
+      "hot": true
+    },
+    {
+      "id": "F-018",
+      "title": "CTX band: lexical overlap unbeaten; all NLI/entailment models collapse on short Bengali answers",
+      "category": "Strategy",
+      "verdict": "verified",
+      "confidence": "HIGH",
+      "critical": false,
+      "redact": true,
+      "tier": "crucial",
+      "version": 2,
+      "author": "deen",
+      "verifier": "deen",
+      "mentions": [],
+      "created": "2026-07-07",
+      "updated": "2026-07-07",
+      "summary": "Lexical token-overlap >=0.85 (held-out 0.780) still beats every NLI approach tried on the CTX band; three separate NLI models collapsed on our 2-5 token Bengali answers.",
+      "body": "CTX-band attempts, all worse than lexical 0.780: MiniCheck-Flan-T5 on raw Bengali = 0.385 (degenerate, English model can't read Bengali); mDeBERTa-v3-mnli-xnli zero-shot = 0.325-0.542 (cross-lingual transfer too weak); BanglaBERT+xnli_bn fine-tune = 0.426 (sentence-NLI doesn't transfer to short-answer rows). Pattern: NLI is trained on full-sentence pairs; our responses are short factual spans, so entailment framing fails. Lexical wins.",
+      "evidence": [
+        {
+          "quote": "lexical 0.7802; MiniCheck-bn 0.385; mDeBERTa-xnli 0.325/0.542; BanglaBERT+xnli_bn 0.4265",
+          "source": "ctx probes kernel_ctx_minicheck_probe.py + kernel_ctx_nli_probe.py + docs/results.csv",
+          "date": "2026-07-07"
+        }
+      ],
+      "changelog": [
+        {
+          "version": 1,
+          "date": "2026-07-07",
+          "note": "Initial."
+        },
+        {
+          "version": 2,
+          "date": "2026-07-07",
+          "note": "tagged hot read — decision-critical"
+        }
+      ],
+      "action": "Keep lexical>=0.85 for CTX. Do NOT re-try MiniCheck / mDeBERTa-xnli / BanglaBERT-NLI as-is. A genuinely different idea is needed to beat lexical.",
+      "glance": "For context-present rows, keep the simple word-overlap rule. Every fancy NLI/entailment model we tried did WORSE — do not re-try them.",
+      "why": "Saves teammates from re-burning time on NLI models for the CTX band; three have already failed the same way.",
+      "keyEvidence": "lexical 0.780 vs MiniCheck-bn 0.385, mDeBERTa 0.325-0.542, BanglaBERT+xnli_bn 0.426 (all held-out macroF1).",
+      "caveat": "All held-out (n=40) numbers; the ranking is stark enough (>0.2 gaps) to trust the direction. Lexical itself is unvalidated for improvement headroom.",
+      "hot": true
+    },
+    {
+      "id": "F-019",
+      "title": "BenHalluEval is IUT-authored = Phase-1 data lineage (taxonomy + training CSVs + CoT rule)",
+      "category": "Data",
+      "verdict": "verified",
+      "confidence": "HIGH",
+      "critical": false,
+      "redact": true,
+      "tier": "crucial",
+      "version": 1,
+      "author": "deen",
+      "verifier": "deen",
+      "mentions": [],
+      "created": "2026-07-07",
+      "updated": "2026-07-07",
+      "summary": "The BenHalluEval paper (arXiv 2503.10995 / 2605.31483) is authored by IUT — our competition host — and organizers confirmed Phase-1 follows its pipeline. Its taxonomy, judge list, and public CSVs are our map.",
+      "body": "Verified from the paper body + its anonymous code repo: authors are IUT (@iut-dhaka.edu), the same institution hosting the competition. Hallucination taxonomy: factualness, comprehension (QA); intrinsic, extrinsic (summarization); arithmetic_slip, wrong_formula, wrong_unit (reasoning). Judge models used include our Qwen3-32B AND TigerLLM-9B. Public labeled CSVs (qa_4000, codemix_4000, reasoning_1000, etc.) exist — usable as TRAINING data only (organizers say Phase-2 has NO samples from them). Verified finding: CoT prompting helps ONLY on the reasoning task (9/21 combos improved, 12 degraded).",
+      "evidence": [
+        {
+          "quote": "Department of Computer Science and Engineering, Islamic University of Technology ... @iut-dhaka.edu",
+          "source": "arXiv 2503.10995 author block",
+          "date": "2026-07-07"
+        }
+      ],
+      "changelog": [
+        {
+          "version": 1,
+          "date": "2026-07-07",
+          "note": "Initial."
+        }
+      ],
+      "action": "Use the taxonomy to structure detectors; use the public CSVs as training data only; apply CoT/thinking only on the math/reasoning route, not worldfact/idiom.",
+      "glance": "The people who built this benchmark are our hosts (IUT). Their paper tells us exactly what hallucination types are tested and gives free labeled training data.",
+      "why": "It is the closest thing to an answer key for what Phase-1/Phase-2 test. Shapes which error types to target and provides training data for any fine-tune.",
+      "keyEvidence": "Paper authors listed under Islamic University of Technology, @iut-dhaka.edu; organizers' Discussion post says Phase-1 follows this pipeline.",
+      "caveat": "Organizers explicitly excluded these datasets' samples from Phase-2 test — use for training/shape only, do NOT expect test overlap or overfit to them."
+    },
+    {
+      "id": "F-020",
+      "title": "Cross-lingual translation for NULL band rejected — gain was just bias-correction, damages idioms",
+      "category": "Strategy",
+      "verdict": "verified",
+      "confidence": "MEDIUM",
+      "critical": false,
+      "redact": true,
+      "tier": "crucial",
+      "version": 1,
+      "author": "deen",
+      "verifier": "deen",
+      "mentions": [],
+      "created": "2026-07-07",
+      "updated": "2026-07-07",
+      "summary": "Translate-to-English then judge (the organizer-touted cross-lingual signal) gave no real lift on our NULL fold — its apparent gain was just hallucination-bias correction, and it damaged idiom rows.",
+      "body": "Probed cross-lingual consistency (translate Bengali Q+A to English, judge there, use disagreement). On the 51-row NULL fold: the combo's gain came from the English pass simply flagging more hallucinations (bias-correction), NOT from English knowing more — on disagreements the Bengali side was MORE often correct (0.54 vs 0.46). It also damaged idiom accuracy (idiom translations like 'Dojobar -> Nothing being' are garbage). A cheaper Bengali-only prompt reframe captured the same bias-fix without translation. NOTE: this rejection is itself on the n=51 fold — see F-016 caveat; the bias-fix (prompt C) later failed at scale too.",
+      "evidence": [
+        {
+          "quote": "on disagreements English-side correct 0.46 vs Bengali 0.54; idiom 0.80->0.60",
+          "source": "kernel_null_crosslingual_probe.py output",
+          "date": "2026-07-06"
+        }
+      ],
+      "changelog": [
+        {
+          "version": 1,
+          "date": "2026-07-07",
+          "note": "Initial."
+        }
+      ],
+      "action": "Do not invest in MT-based cross-lingual judging as a quick win. If revisited, design beyond translate-then-judge and validate on the full leaderboard.",
+      "glance": "Translating Bengali to English before judging did not actually help our closed-book rows and wrecks idioms — skip it as a standalone lever.",
+      "why": "Organizers named cross-lingual consistency the top signal; we checked and it did not pay off on our data as a simple translate-then-judge, so don't build heavy MT infra for it blindly.",
+      "keyEvidence": "On judge disagreements, Bengali side correct 0.54 vs English 0.46; idiom route damaged 0.80 to 0.60 under translation.",
+      "caveat": "All on the n=51 NULL fold (unreliable, see F-016). Does NOT rule out a smarter cross-lingual design; only the simple translate-then-judge was tested."
     }
   ]
 }
