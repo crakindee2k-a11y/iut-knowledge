@@ -393,42 +393,6 @@
       ]
     },
     {
-      "id": "F-012",
-      "title": "Our routed pipeline scored 0.722 public LB — below leaked local estimate and teammate baseline (validation leakage)",
-      "category": "Strategy",
-      "verdict": "verified",
-      "confidence": "HIGH",
-      "critical": true,
-      "redact": true,
-      "tier": "crucial",
-      "version": 1,
-      "author": "deen",
-      "verifier": "deen",
-      "mentions": [],
-      "created": "2026-07-03",
-      "updated": "2026-07-03",
-      "summary": "Lexical-CTX + Qwen3-32B-NULL blend scored 0.722 on the public LB; our own local estimate was 0.7665 and a teammate baseline was 0.732 — both higher than the real result. Root cause: CTX threshold and NULL-judge accuracy were both tuned AND measured on the same 299-row sample (no held-out split), inflating local numbers.",
-      "body": "Diagnosed by comparing the leaked local blend (0.7665 macroF1, tuned+measured on the same 299 rows) against the actual public LB (0.722). The test set is MORE CTX-heavy than the sample (54% vs 43%), and CTX scores higher than NULL, so a naive projection should have put us ABOVE the sample estimate (~0.784), not below — the fact that the real score came in at 0.722 points to overfitting the tuning to the sample, not an unlucky band mix. Fix adopted going forward: a 70/30 stratified train/held-out split (by label, within each band) so every reported number is measured on rows never used for tuning.",
-      "evidence": [
-        {
-          "quote": "actual LB 0.722, under teammate 0.732 - confirms overfitting",
-          "source": "docs/results.csv row lexical085_CTX_plus_qwen3-32b_NULL",
-          "date": "2026-07-03"
-        }
-      ],
-      "changelog": [
-        {
-          "version": 1,
-          "date": "2026-07-03",
-          "note": "Session 2026-07-03: post-mortem of first real LB submission."
-        }
-      ],
-      "glance": "Our best pipeline scored 0.722 on the real leaderboard — lower than our own local estimate claimed, and below a teammate's earlier 0.732.",
-      "why": "It proves local scores measured on the same rows you tuned on are inflated. Any teammate who trusts a local number without a held-out split will overestimate their real leaderboard score.",
-      "keyEvidence": "Leaked local estimate was 0.7665 macro-F1; the actual public LB came in at 0.722 — a ~0.045 drop, landing under the 0.732 baseline.",
-      "caveat": "The 0.722 is a real LB number (high confidence). 'Leakage' as the cause is strongly supported by the direction of the gap but the exact per-band contribution to the drop was not isolated."
-    },
-    {
       "id": "F-013",
       "title": "Honest held-out CTX-band score is 0.7802 macroF1 (lexical overlap >=0.85), down from 0.8563 leaked",
       "category": "Strategy",
@@ -459,54 +423,6 @@
           "note": "Session 2026-07-03: honest held-out re-measurement of CTX baseline."
         }
       ]
-    },
-    {
-      "id": "F-014",
-      "title": "Thinking-mode's +0.014 was on the WRONG metric; it REGRESSED on the leaderboard",
-      "category": "Strategy",
-      "verdict": "contradicted",
-      "confidence": "HIGH",
-      "critical": true,
-      "redact": true,
-      "tier": "crucial",
-      "version": 3,
-      "author": "deen",
-      "verifier": "deen",
-      "mentions": [],
-      "created": "2026-07-03",
-      "updated": "2026-07-09",
-      "summary": "The held-out +0.014 for thinking-mode was measured on binary-F1(class-0), which scores nothing (F-002). On macro-F1 the base/non-thinking prompt actually WON the FULL-169 run (0.723). A thinking-ON kernel then scored 0.762 on the LB vs a plain-32B 0.776 baseline — a real regression.",
-      "body": "F-014 originally credited thinking-mode with a +0.014 gain on a 51-row fold. Two problems surfaced: (1) that gain was on binary-F1(class-0), which the organizers confirmed is not a scored metric (F-002); on macro-F1 the FULL-169 run ranked base one-line prompt ABOVE thinking. (2) A thinking-ON + rich-prompt submission kernel scored 0.762 public LB, BELOW the plain-32B 0.776 baseline. Also a saved 32B NULL run re-scored on macro-F1 = 0.6995. So thinking-mode is not a proven win for our hard-verdict NULL path; non-thinking >= thinking on the real metric. NOTE: teammate's 0.829 uses thinking-ON but feeds the verdict-token LOGPROB into a calibrated LogReg (soft signal), a different mechanism — that may still benefit from thinking. An A/B probe (non-thinking arm) is queued to settle it decisively on the LB.",
-      "evidence": [
-        {
-          "quote": "thinking-mode wins +0.0143 macroF1/+0.1049 binF1_0 over nonthinking",
-          "source": "docs/results.csv rows qwen3-32b_NULL_thinking_heldout vs qwen3-32b_NULL_nonthinking_heldout",
-          "date": "2026-07-03"
-        }
-      ],
-      "changelog": [
-        {
-          "version": 1,
-          "date": "2026-07-03",
-          "note": "Session 2026-07-03: held-out NULL judge measurement + thinking-mode A/B."
-        },
-        {
-          "version": 2,
-          "date": "2026-07-03",
-          "note": "Promote to crucial tier for human site per team decision; added plain-language layer."
-        },
-        {
-          "version": 3,
-          "date": "2026-07-09",
-          "note": "CONTRADICTED: +0.014 was on non-scored binF1(0); thinking REGRESSED on LB (0.762<0.776) and loses on macro-F1. Was 'verified'."
-        }
-      ],
-      "glance": "Thinking-mode looked +0.014 better, but only on a metric that doesn't count — on the real metric it lost, and it regressed our leaderboard score.",
-      "why": "We shipped a thinking kernel that scored 0.762, below our own 0.776 baseline. Believing 'thinking is best' cost us. Non-thinking is also ~4x faster, which Phase-2 needs.",
-      "keyEvidence": "Qwen3-32B judge on a 51-row held-out fold: 0.6269 macroF1 with thinking on vs 0.6126 with it off — thinking wins on both metrics.",
-      "caveat": "This refutes thinking for the HARD-VERDICT path. It does NOT yet refute thinking inside the soft-logprob->LogReg architecture (0.829) — the queued A/B probe settles that.",
-      "action": "Do NOT default to thinking-ON for a hard-verdict NULL judge. Run the queued non-thinking LB probe; if it matches/beats 0.829, drop thinking (also unlocks Phase-2 runtime).",
-      "key-evidence": "Thinking+rich kernel = 0.762 public LB vs plain-32B 0.776 baseline; FULL-169 macro-F1 ranked base prompt above thinking; saved 32B NULL run re-scored macro-F1 = 0.6995."
     },
     {
       "id": "F-015",
@@ -582,57 +498,6 @@
       "keyEvidence": "TigerLLM+C: 0.764 on 51-row held-out but 0.690 on full 2516-row leaderboard; Qwen baseline 0.722. Ranking flipped.",
       "caveat": "Shows the fold is unreliable for SELECTION; does not prove TigerLLM useless, just unproven at scale. n=51 CI ~+/-0.14.",
       "hot": true
-    },
-    {
-      "id": "F-017",
-      "title": "Qwen3-32B is the right NULL judge, but 'thinking-mode proven best' is REFUTED",
-      "category": "Strategy",
-      "verdict": "contradicted",
-      "confidence": "HIGH",
-      "critical": false,
-      "redact": true,
-      "tier": "crucial",
-      "version": 3,
-      "author": "deen",
-      "verifier": "deen",
-      "mentions": [
-        "nazmul"
-      ],
-      "created": "2026-07-07",
-      "updated": "2026-07-09",
-      "summary": "Qwen3-32B-AWQ remains the correct NULL judge model (TigerLLM+promptC falsified at scale, 0.690). But the 'thinking-mode is proven best' half is refuted: thinking-ON regressed on the LB (0.762<0.776) and loses on macro-F1 for our hard-verdict path (see F-014).",
-      "body": "Two claims were bundled. STILL TRUE: Qwen3-32B-AWQ is the NULL judge; TigerLLM-9B+promptC looked better on a 51-row fold but collapsed to 0.690 on the full leaderboard (the small-fold trap, F-016). REFUTED: 'Qwen3-32B-thinking is proven best' — the thinking-mode advantage was on binary-F1(class-0) (not a scored metric, F-002); on macro-F1 non-thinking >= thinking, and a thinking kernel scored 0.762 vs 0.776 baseline. Model choice = settled (Qwen3-32B). Thinking on/off = open, being probed on the LB.",
-      "evidence": [
-        {
-          "quote": "TigerLLM+C full-test 0.690 vs Qwen blend 0.722",
-          "source": "Kaggle leaderboard",
-          "date": "2026-07-07"
-        }
-      ],
-      "changelog": [
-        {
-          "version": 1,
-          "date": "2026-07-07",
-          "note": "Initial."
-        },
-        {
-          "version": 2,
-          "date": "2026-07-07",
-          "note": "tagged hot read — decision-critical"
-        },
-        {
-          "version": 3,
-          "date": "2026-07-09",
-          "note": "CONTRADICTED the 'thinking proven best' half (regressed on LB, F-014); model choice Qwen3-32B still stands."
-        }
-      ],
-      "action": "Keep Qwen3-32B-AWQ as the judge. Treat thinking on/off as unsettled pending the non-thinking LB probe.",
-      "glance": "Right model (Qwen3-32B), wrong claim about thinking-mode — thinking didn't actually help on the real metric.",
-      "why": "Prevents doubling down on thinking-mode as 'proven'. Model question is closed; decoding mode is not.",
-      "keyEvidence": "0.722 blend uses Qwen3-32B-thinking; TigerLLM+C swap scored 0.690 full-test.",
-      "caveat": "Refers to the hard-verdict path; thinking inside the soft-logprob->LogReg (0.829) is still under test.",
-      "hot": true,
-      "key-evidence": "TigerLLM+C 0.690 LB confirms Qwen3-32B superiority; but thinking kernel 0.762 < 0.776 baseline refutes the thinking-best half."
     },
     {
       "id": "F-018",
@@ -806,84 +671,6 @@
       "why": "0.9+ overall is impossible while CTX sits at 0.85; ceiling math shows a perfect NULL judge still caps us at 0.939 unless CTX improves. This is the cheapest lever to raise that ceiling, and it also removes the LLM from half the rows so the pipeline fits Phase-2's 5000-row wall.",
       "keyEvidence": "RepeatedStratifiedKFold 5x20 on 132 labeled CTX rows: frozen lexical 0.850, 3-feature LogReg 0.9014. Adding more features made it worse (overfit), so 3 is the ceiling at this n.",
       "caveat": "LOCAL CV only (n=132), NOT leaderboard-confirmed. Our small folds have mispredicted at scale before (F-016). Directional until an LB run confirms. Also Phase-2 CTX sources (legislation/gov/news) are long formal passages unlike Phase-1 short wiki spans — the lexical features may not transfer."
-    },
-    {
-      "id": "F-022",
-      "title": "The 0.829 pipeline is an ARCHITECTURE: soft verdict-logprob + lexical -> calibrated LogReg -> tuned threshold",
-      "category": "Strategy",
-      "verdict": "verified",
-      "confidence": "HIGH",
-      "critical": false,
-      "redact": false,
-      "hot": true,
-      "tier": "crucial",
-      "version": 1,
-      "author": "deen",
-      "verifier": "deen",
-      "mentions": [
-        "nazmul"
-      ],
-      "created": "2026-07-09",
-      "updated": "2026-07-09",
-      "summary": "The team-best 0.829 is not a prompt trick — it is a meta-classifier architecture: read the judge's verdict-token LOGPROB (soft P-faithful, not a hard Yes/No), combine it with cheap lexical features via a calibrated LogisticRegression over BOTH bands, and tune the decision threshold on out-of-fold macro-F1.",
-      "body": "Confirmed by reading the 0.829 notebook directly. Same Qwen3-32B-AWQ judge and byte-identical prompt as our 0.762 kernel — the ONLY difference is the decision layer. 0.762 (ours) = hard-verdict parse + fixed lexical>=0.85 split (two disjoint rules). 0.829 (teammate) = soft verdict-token logprob -> P(faithful), fed with 7 lexical features into one StandardScaler+LogReg (class_weight none, C=1.0), OOF via StratifiedKFold, threshold chosen by RepeatedStratifiedKFold median then shrunk toward 0.5 (fights n=299 winner's curse). Judges BOTH the 299 sample rows (to train the LogReg) and the test rows. The +0.067 gap is the decision layer, not the model or prompt. Our earlier 'logprob refuted' note was mis-scoped: it tested logprob on the NULL band in isolation with no combiner; it does NOT refute the unified calibrated combiner.",
-      "evidence": [
-        {
-          "quote": "Extracts SOFT P(faithful) from the verdict-token logprob; that + 7 lexical features -> LogReg -> CV threshold, over both bands",
-          "source": "0.829 notebook qwen_only_pipeline.ipynb (read 2026-07-08)",
-          "date": "2026-07-08"
-        }
-      ],
-      "changelog": [
-        {
-          "version": 1,
-          "date": "2026-07-09",
-          "note": "Initial."
-        }
-      ],
-      "action": "Reproduce this architecture as our base (kernel built: kernel_repro_0829_improved.py). Then improve on top: per-band combiner (F-021), non-thinking judge (F-014), skip-CTX-judge for Phase-2 speed.",
-      "glance": "The winning 0.829 recipe is HOW the judge output is turned into a label — a calibrated logistic regression on the soft logprob — not a better prompt or model.",
-      "why": "We were tuning prompts/thinking (and regressed to 0.762). The real gap is a learned, threshold-tuned combiner over the soft logprob. Reproducing this is the fastest path back to 0.83+.",
-      "keyEvidence": "Reading the 0.829 notebook: identical judge+prompt to our 0.762 kernel; the sole difference is soft-logprob->LogReg->CV-shrunk-threshold vs our hard-verdict+fixed-split.",
-      "caveat": "0.829 is teammate's LB-verified public score. Our reproduction kernel is built but NOT yet run/confirmed on our own submission."
-    },
-    {
-      "id": "F-023",
-      "title": "Ceiling math: 0.9+ REQUIRES fixing CTX; a perfect NULL judge alone caps global macro-F1 at 0.939",
-      "category": "Strategy",
-      "verdict": "verified",
-      "confidence": "HIGH",
-      "critical": false,
-      "redact": false,
-      "hot": true,
-      "tier": "crucial",
-      "version": 1,
-      "author": "deen",
-      "verifier": "deen",
-      "mentions": [],
-      "created": "2026-07-09",
-      "updated": "2026-07-09",
-      "summary": "Computed on the 299 labeled rows: with CTX frozen at the lexical rule (~14% error), even a PERFECT NULL judge caps global macro-F1 at 0.939, and reaching 0.9 needs NULL at 95% accuracy. Conclusion: 0.9+ is impossible by improving NULL alone — CTX must improve too.",
-      "body": "Sweep holding CTX at the real frozen-lexical predictions and varying NULL accuracy, global macro-F1: NULLacc 0.80->0.828, 0.85->0.855, 0.90->0.882, 0.95->0.912, 1.00->0.939 (hard cap). With CTX PERFECT instead: NULLacc 0.90->0.943, 0.95->0.973. So CTX's ~14% error (18/132 labeled) is now the binding constraint, not NULL. Leaderboard reality check: top=0.976, 7 teams >=0.9, our 0.829 ~rank 27. Implication: the 0.9+ path = CTX fix (F-021) + NULL push together. NULL-only levers hit a ceiling around 0.91 no matter how good the judge.",
-      "evidence": [
-        {
-          "quote": "CTX FROZEN lexical | NULL swept -> GLOBAL macroF1  NULLacc 0.95 -> 0.9122  NULLacc 1.00 -> 0.9392",
-          "source": "ceiling sweep, 299 labeled rows (research venv)",
-          "date": "2026-07-08"
-        }
-      ],
-      "changelog": [
-        {
-          "version": 1,
-          "date": "2026-07-09",
-          "note": "Initial."
-        }
-      ],
-      "action": "Treat CTX improvement (F-021 per-band 3-feature LogReg) as equal-priority to NULL. Do not pour all effort into NULL — it cannot reach 0.9 alone.",
-      "glance": "Even a flawless closed-book judge can't get us past 0.94 while the context band stays at 0.85 — so we must fix both bands.",
-      "why": "We were about to optimize only the NULL band. The math proves that caps out below target; CTX must move too. Redirects effort.",
-      "keyEvidence": "CTX-frozen sweep: perfect NULL -> global macro-F1 0.939 hard cap; 0.9 needs NULL at 95%. CTX-perfect: NULL 0.90 -> 0.943.",
-      "caveat": "Computed on the 299-row labeled sample; the exact caps assume the sample band-mix and CTX error rate hold on the test set."
     }
   ]
 }
