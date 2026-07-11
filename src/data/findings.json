@@ -632,14 +632,14 @@
       "redact": false,
       "hot": false,
       "tier": "crucial",
-      "version": 2,
+      "version": 3,
       "author": "deen",
       "verifier": "deen",
       "mentions": [
         "nazmul"
       ],
       "created": "2026-07-09",
-      "updated": "2026-07-09",
+      "updated": "2026-07-11",
       "summary": "On the 132 labeled context-present rows, a 3-feature logistic regression (token-overlap + jaccard + resp-in-context substring, class_weight=balanced) scores 0.9014 CV macro-F1 — beating the frozen lexical>=0.85 rule (0.85) by +0.05, without any LLM judge.",
       "body": "The CTX band was long treated as 'solved/frozen' at lexical overlap>=0.85 (F-018). Reopened because the 0.9+ target makes CTX's ~14% error the binding constraint (ceiling math: perfect NULL + frozen CTX caps global macro-F1 at 0.939). RepeatedStratifiedKFold 5x20 on the 132 labeled CTX rows: frozen rule 0.850+/-0.068; 3-feature LogReg [tok_overlap, jaccard, resp_in_ctx] with class_weight=balanced = 0.9014+/-0.0552. The 3-feature set is the sweet spot: adding number-match feats (0.899) or all 7 cheap feats (0.891) is WORSE = overfit at n=132. Number-match as a HARD OR-rule net-washed (fixed 4 FN, added 4 FP). CTX error breakdown: 18/132 = 10 false-pos + 8 false-neg; the 8 FN are mostly Bengali numeral word-vs-digit surface mismatches on correct values. Fits naturally into a per-band combiner (CTX band gets these 3 lexical feats; NULL band gets judge features). Bonus: needs NO LLM judge on CTX rows, which is also the Phase-2 runtime unlock.",
       "evidence": [
@@ -664,13 +664,185 @@
           "version": 2,
           "date": "2026-07-09",
           "note": "unredact per team decision (public-site edge accepted)"
+        },
+        {
+          "version": 3,
+          "date": "2026-07-11",
+          "note": "Per-band combiner recommendation in 'action' field LB-refuted 2026-07-09 (see F-022); corrected to recommend unified combiner instead."
         }
       ],
-      "action": "Adopt a per-band combiner: CTX rows -> 3-feature LogReg (no judge), NULL rows -> judge features. Skips the LLM on ~53% of rows (Phase-2 scale feasibility) AND lifts CTX. Must be LEADERBOARD-confirmed before locking (F-016).",
+      "action": "LB-REFUTED for the per-band half of this action (2026-07-09): per-band combiner cost -0.024 vs unified (0.805 vs 0.829 LB, see F-022). Correct action now: fold the 3-feature CTX LogReg into a UNIFIED combiner (all rows, one LogReg), not a separate per-band model. This local CV result (0.90 CTX-only) itself remains LB-unconfirmed.",
       "glance": "A tiny 3-feature model on context rows scores 0.90 — five points above the old frozen rule, using zero GPU.",
       "why": "0.9+ overall is impossible while CTX sits at 0.85; ceiling math shows a perfect NULL judge still caps us at 0.939 unless CTX improves. This is the cheapest lever to raise that ceiling, and it also removes the LLM from half the rows so the pipeline fits Phase-2's 5000-row wall.",
       "keyEvidence": "RepeatedStratifiedKFold 5x20 on 132 labeled CTX rows: frozen lexical 0.850, 3-feature LogReg 0.9014. Adding more features made it worse (overfit), so 3 is the ceiling at this n.",
-      "caveat": "LOCAL CV only (n=132), NOT leaderboard-confirmed. Our small folds have mispredicted at scale before (F-016). Directional until an LB run confirms. Also Phase-2 CTX sources (legislation/gov/news) are long formal passages unlike Phase-1 short wiki spans — the lexical features may not transfer."
+      "caveat": "LOCAL CV only (n=132), NOT leaderboard-confirmed. Our small folds have mispredicted at scale before (F-016). Directional until an LB run confirms. Also Phase-2 CTX sources (legislation/gov/news) are long formal passages unlike Phase-1 short wiki spans -- the lexical features may not transfer. UPDATE 2026-07-09: the per-band COMBINER half of this finding's action is now LB-REFUTED -- see F-022 (per-band cost -0.024 vs unified on a real leaderboard run). The 3-feature CTX improvement itself was never re-tested inside a unified combiner on the leaderboard."
+    },
+    {
+      "id": "F-022",
+      "title": "LB-confirmed: thinking beats non-thinking (+0.047), per-band combiner costs -0.024; kernel now locked to unified+skip-CTX+thinking",
+      "category": "Strategy",
+      "verdict": "verified",
+      "confidence": "HIGH",
+      "critical": false,
+      "redact": true,
+      "hot": true,
+      "tier": "crucial",
+      "version": 1,
+      "author": "deen",
+      "verifier": "deen",
+      "mentions": [],
+      "created": "2026-07-11",
+      "updated": "2026-07-11",
+      "summary": "Three real leaderboard submissions settled two architecture questions: thinking-mode beats non-thinking by +0.047 macro-F1, and splitting the combiner into per-band LogRegs costs -0.024 vs pooling everything into one unified LogReg. kernel_repro_0829_improved.py is now locked to thinking-ON (640 tok) + unified combiner + skip-CTX-judge.",
+      "body": "Ladder (all same kernel family, thinking-ON unless noted): teammate's original run (thinking, judge-ALL bands, UNIFIED combiner) = 0.829 LB, our TEAM BEST and current safe score with 1 submission slot left. Our Phase-2-shape run (thinking 640tok, SKIP_CTX_JUDGE, PER-BAND combiner) = 0.805 LB. Our non-thinking run (256 tok, otherwise same shape) = 0.782 LB. An earlier hard-verdict thinking variant = 0.762 LB (retired, different architecture, do not cite against thinking). Reading the ladder: (1) thinking-ON beats non-thinking by +0.047 on matched configs -- settled, non-thinking NULL judge is close to a coin-flip on closed-book Bangla facts. (2) Per-band combiner (separate LogReg per NULL/CTX band) is a -0.024 mistake vs unified (single LogReg over both bands pooling all 299 labeled rows): the per-band split creates two smaller, higher-variance folds, while unified pools all 299 rows into one model. Local OOF simulation on the SAME judge scores confirmed this (unified 0.8255 OOF vs per-band 0.8124 OOF). (3) OOF-vs-LB gap was ~0 for thinking runs (locally trustworthy) but -0.046 for the non-thinking run -- OOF estimates need per-config calibration, they don't transfer across thinking/non-thinking. Decision: kernel_repro_0829_improved.py is LOCKED to ENABLE_THINKING=True, THINK_MAX_TOKENS=640, PER_BAND_COMBINER=False (unified), SKIP_CTX_JUDGE=True, RUN_TAG=r_think640_skipctx_unified. This shape also runs ~2.5h vs teammate's 8-9h, which is what makes it feasible to run at Phase-2's ~5000-row scale within the 12h wall -- was UNRUN on GPU as of last check (GPU quota exhausted), staged as the first Phase-2 de-risk run.",
+      "evidence": [
+        {
+          "quote": "\"public_score\": \"0.829\"",
+          "source": "Kaggle submission ref 54419543, r1-qwenonly.csv, team \"Make America Great Again\"",
+          "date": "2026-07-07"
+        },
+        {
+          "quote": "\"public_score\": \"0.805\"",
+          "source": "Kaggle submission ref 54487023, submission(3).csv (\"thinking band devide\")",
+          "date": "2026-07-09"
+        },
+        {
+          "quote": "\"public_score\": \"0.782\"",
+          "source": "Kaggle submission ref 54479294, kernel_repro_0829_improved(no thinking).csv (\"null judge phuked, carried by ctx only, no thinking mode\")",
+          "date": "2026-07-09"
+        }
+      ],
+      "changelog": [
+        {
+          "version": 1,
+          "date": "2026-07-11",
+          "note": "Initial."
+        }
+      ],
+      "action": "Submit only from the locked unified+skip-CTX+thinking640 config going forward. Do not re-attempt per-band combiners or non-thinking NULL judge runs -- both are LB-refuted, not local-CV guesses.",
+      "glance": "Real leaderboard runs (not local guesses) proved thinking mode wins and splitting the model by band loses points -- so the pipeline is now locked to one config: thinking on, one combined model.",
+      "why": "These are the two biggest architecture forks in the whole pipeline (thinking vs not, split-vs-pooled model) and both are now decided by actual submissions, not held-out estimates. Any future run should build on the locked config, not re-litigate these two questions.",
+      "keyEvidence": "0.829 (unified, thinking) vs 0.805 (per-band, thinking) vs 0.782 (unified, non-thinking) -- three real leaderboard scores on the same kernel family.",
+      "caveat": "Team's account is merged and already safe at 0.829 with 1 submission slot left, so none of the later runs (0.805, 0.782) could be submitted as a final entry -- they were architecture probes spending the other account's slots, not attempts to beat 0.829. The locked unified+skip-CTX+thinking640 kernel itself was still UNRUN end-to-end on GPU as of the last check; its ~0.82 projection is from OOF simulation, not a fresh leaderboard run."
+    },
+    {
+      "id": "F-023",
+      "title": "CTX QA-verifier lever KILLED: synthetic ROC-AUC 0.9515 looked strong but fails the real decision test",
+      "category": "Strategy",
+      "verdict": "verified",
+      "confidence": "HIGH",
+      "critical": false,
+      "redact": true,
+      "hot": true,
+      "tier": "crucial",
+      "version": 1,
+      "author": "deen",
+      "verifier": "deen",
+      "mentions": [],
+      "created": "2026-07-11",
+      "updated": "2026-07-11",
+      "summary": "A second-stage Qwen3-32B judge built to catch wrong-entity hallucinations in the CTX band's high-overlap rows scored ROC-AUC=0.9515 on a 1000-row synthetic test, but no probability threshold achieves an acceptable faithful-false-drop rate (best case only reaches <=10%-drop, not the <=5% bar needed) -- the lever is dead, not a wiring problem.",
+      "body": "CTX band was reopened because ceiling math showed its 13.6% error rate is now the binding constraint for a 0.9+ target (perfect NULL judge + frozen lexical CTX still caps global macro-F1 at 0.939). Error dissection on the 132 labeled CTX rows found the 18 errors split into two families: ~9 surface-mismatch FN (Bengali numeral-word vs digit, tokenization) and ~9-10 wrong-entity-answer FP, ALL sitting at token-overlap ov=1.0 (response is verbatim IN the context but answers the wrong sub-question, e.g. 1st-vs-last principal, Philosopher's Stone vs Chamber of Secrets). Naive ceiling math (perfectly fixing just those FP) projects macro-F1 up to 0.9365-0.943 on the 132-row sample. Built ctx_verifier_eval.py: applies the EXACT Qwen3-32B judge prompt from kernel_repro_0829_improved.py as a second-stage check, ONLY on CTX rows with token_recall>=0.85 (719/1361 test rows), asking 'does response correctly answer question given context' instead of trusting the lexical rule blindly. Validated on a 1000-row balanced sample built from BenHalluEval's 594 host-generated high-overlap hallucinations (synthetic wrong-entity swaps) + matching faithful rows, using the real Qwen3-32B thinking judge on Kaggle GPU. Result: ROC-AUC=0.9515; confusion at best threshold 0.96: tp445 fp56 tn444 fn55 (in-sample F1 0.889) -- looks like a strong signal. BUT the deployment-relevant test is different: on the real CTX distribution, ~88% of high-overlap rows are TRUE faithful, so any hard veto must have very high precision or it destroys more faithful predictions than hallucinations it catches. Sweeping every threshold, NO threshold achieves <=2% or <=5% faithful false-drop; only the <=10%-drop threshold works, and even that only catches 85.6% of FP while dropping 49/500 faithful. Root cause: the judge is confidently WRONG on ~11% of correct answers (P near 0 on truly faithful rows) -- a 'Trust Me I'm Wrong' failure mode that doesn't move with the threshold. Lexical overlap is blind at ov=1.0 for both the true-halluc and the confidently-misjudged-faithful rows, so a single monotonic LogReg weight on the judge's P score cannot separate them (that would need a non-linear/region model). Projected onto the real ~900-row high-overlap test band, a hard-flag veto catches ~90 real hallucinations but breaks ~87 real faithful rows (1.02:1 catch/break) = net macro-F1 neutral-to-negative. Separately flagged: BenHalluEval's 594 synthetic cases are host-generated systematic entity-swaps, a DIFFERENT and likely easier distribution than our organic FP (only n=9) -- so a good synthetic AUC would have been an UNTRUSTWORTHY positive requiring further organic + Phase-2 domain-shift validation anyway; the ACTUAL gate failure is a trustworthy NEGATIVE that ends the lane outright.",
+      "evidence": [
+        {
+          "quote": "ROC-AUC=0.9515. confusion @best-thr0.96: tp445 fp56 tn444 fn55 (in-sample F1 0.889). BUT high-precision gate FAILS: no threshold achieves <=2% or <=5% faithful false-drop; only <=10%-drop works (catches 85.6% FP, drops 49/500 faithful).",
+          "source": "Kaggle GPU run, ctx_verifier_eval.py backend=vllm, 1000-row balanced BenHalluEval-derived valset, real Qwen3-32B thinking judge, recorded in project memory 2026-07-10",
+          "date": "2026-07-10"
+        }
+      ],
+      "changelog": [
+        {
+          "version": 1,
+          "date": "2026-07-11",
+          "note": "Initial."
+        }
+      ],
+      "action": "Do not build a CTX judge/QA-verifier feature. Keep SKIP_CTX_JUDGE=True + lexical-only for the CTX band in the locked kernel. Reopening this lane would require a non-linear/region-based combiner that can isolate where the judge's confident-wrong mass lives, not a single LogReg weight on judge-P -- unbuilt, unproven, and the underlying problem (judge confidently misjudging 11% of correct high-overlap answers) may not be fixable by combiner design at all.",
+      "glance": "Built a second AI judge to catch wrong-answer mistakes hiding in the context-grounded band. It looked great on a test run, but when checked properly it would delete more correct answers than the wrong ones it catches -- so it's shelved.",
+      "why": "This closes off what looked like the single biggest lever for pushing macro-F1 past 0.9 (ceiling math said fixing these errors could add 5-9 points on the CTX band alone). Knowing it's dead -- and WHY -- stops anyone from re-spending GPU time rebuilding the same judge-feature approach.",
+      "keyEvidence": "Real Qwen3-32B judge run on 1000 rows: ROC-AUC 0.9515, but the highest-precision usable threshold only reaches a 10% faithful-false-drop rate, not the <=5% needed to net-positive on macro-F1 given the real ~88% faithful base rate in the high-overlap band.",
+      "caveat": "The 0.9515 AUC number is on BenHalluEval's SYNTHETIC high-overlap hallucinations (host-generated systematic entity swaps), which may be an easier pattern than our organic test errors (only n=9 known cases). That means the negative result is the trustworthy direction here (if the judge can't hit a usable precision even on the easy synthetic case, it's not going to work on the harder organic one) -- but a hypothetically GOOD synthetic result would NOT have been enough to ship without further organic + Phase-2 domain-shift checks, per the small-fold-trap lesson."
+    },
+    {
+      "id": "F-024",
+      "title": "NULL band errors are confidently wrong, not uncertain (39/44 on n=169) -- self-answer and cross-lingual self-consistency levers both killed",
+      "category": "Strategy",
+      "verdict": "verified",
+      "confidence": "MEDIUM",
+      "critical": false,
+      "redact": true,
+      "hot": true,
+      "tier": "crucial",
+      "version": 1,
+      "author": "deen",
+      "verifier": "deen",
+      "mentions": [],
+      "created": "2026-07-11",
+      "updated": "2026-07-11",
+      "summary": "On 169 labeled NULL rows judged by the real Qwen3-32B thinking judge, 39 of 44 errors are CONFIDENT mistakes (|P-0.5|>0.4), not uncertain calls -- meaning threshold/calibration tuning can fix at most ~5 rows. Idiom (46%) and definition (43%) question types error at roughly double the rate of worldfact questions (25%). Two distinct fixes aimed at this confident-wrong class were built and killed: same-language self-answer verification and cross-lingual (EN/BN) self-consistency.",
+      "body": "From a fully-judged 169-row NULL checkpoint (thinking-ON, real Qwen3-32B judge P scores): raw-judge macro-F1=0.736 at threshold 0.55, with 44/169 errors (17 FP + 27 FN). Critical finding: 39/44 errors have |P-0.5|>0.4, meaning the model is SURE but WRONG -- only 5/44 are genuinely near the 0.5 uncertain boundary. This rules out calibration/threshold tuning as a lever (it can only touch those 5 rows) and marks the errors as a KNOWLEDGE/REASONING gap, not a confidence-calibration gap. Error rate by question type: IDIOM 46% (6/13), DEFINITION 43% (6/14), WORLDFACT 25% (28/114), NUMERIC/DATE 14% (4/28) -- idiom+definition are only 16% of rows but a disproportionate share of errors, though at n=13/14 this sub-slice itself is a small-fold read. Of the 28 worldfact errors specifically, 17 are false-negatives where the judge flags a genuinely CORRECT Bangladesh-specific answer as hallucinated (e.g. Mujib born in Tungipara, constitution date 16 Dec 1972) purely because it doesn't recognize the fact -- the organizer-warned 'skeptical false-flag on unfamiliar-but-true facts' pattern. Two levers were built specifically to attack this confident-wrong class and both were killed on design-critique: (1) SAME-LANGUAGE SELF-ANSWER -- have the model answer its own prompt from parametric knowledge, then compare via embedding similarity to the given response. Killed because it queries the SAME parametric knowledge the verdict-judge already used: on the dominant confident-wrong case the model believes a wrong fact, so its self-answer is wrong in the same direction -- anti-correlated with correctness, not just redundant. Also the embedding instrument itself was found broken (BGE-m3 cosine similarity on 2-token Bangla facts put unrelated wrong answers close together and correct paraphrases far apart, AUC~0.5 uninterpretable). (2) CROSS-LINGUAL SELF-CONSISTENCY (a distinct mechanism from the earlier-rejected translate-then-judge approach) -- ask the same factual question in English and Bengali and check agreement. Killed for multiple compounding reasons: only 115/169 NULL rows are even language-neutral candidates (39 are BN-language-intrinsic word-meaning/grammar questions and 15 are math-reasoning, both nonsensical to ask in English); the effective applicable-positive count is roughly 56, giving a Hanley-McNeil AUC standard error of about 0.067 -- too small to distinguish a real 0.62 signal from noise; and Phase-2's domain shift toward more Bangladesh-local government/news/legal content makes the technique LESS applicable over time, not more, since BD-local facts are unknowable by the model in any language.",
+      "evidence": [
+        {
+          "quote": "Errors are CONFIDENT, not uncertain: 39/44 errors have |P-0.5|>0.4 (model is SURE but WRONG), only 5/44 are near-0.5 uncertain.",
+          "source": "project memory, analysis of a 169-row fully-judged NULL checkpoint (thinking-ON Qwen3-32B judge)",
+          "date": "2026-07-09"
+        },
+        {
+          "quote": "Error rate by question type: IDIOM 46% (6/13), DEFINITION 43% (6/14), WORLDFACT 25% (28/114), NUMERIC/DATE 14% (4/28).",
+          "source": "project memory, same 169-row checkpoint analysis",
+          "date": "2026-07-09"
+        }
+      ],
+      "changelog": [
+        {
+          "version": 1,
+          "date": "2026-07-11",
+          "note": "Initial."
+        }
+      ],
+      "action": "Do not re-attempt same-language self-answer or cross-lingual self-consistency as NULL-band levers -- both are knowledge-gap-bound, not calibration-fixable. NULL band's real ceiling looks to be near its current ~0.72-0.74 without an EXTERNALLY-sourced knowledge injection (offline RAG, gold-answer lookup, or a more Bangladesh-knowledgeable open model).",
+      "glance": "When the AI judge gets a Bangladesh-knowledge question wrong, it's not unsure -- it's confidently, completely wrong. That rules out the easy fixes (better thresholds, asking the model to double-check itself) and points at a real knowledge gap instead.",
+      "why": "This explains why several NULL-band levers (self-answer, cross-lingual) failed for the SAME underlying reason, and stops the team from re-trying variations on the same dead idea. It also tells us where the effort should go instead: sourcing outside knowledge, not squeezing more out of the model's own parametric memory.",
+      "keyEvidence": "39 of 44 judge errors on the 169-row labeled NULL set are confident mistakes (probability far from 0.5), not uncertain ones -- directly measured from the judge's own output probabilities.",
+      "caveat": "n=169 is a small fold -- the team has been burned before by locking decisions on similarly-sized folds that mispredicted at scale (see the TigerLLM 0.764-held-out-to-0.690-LB regression). Treat the taxonomy and error-rate percentages as directional, not exact; the two killed-lever conclusions are on firmer ground since they rest on structural arguments (same knowledge source, language-inapplicability) rather than just the fold's point estimate."
+    },
+    {
+      "id": "F-025",
+      "title": "SOMAJGYAAN/BQAD2025 external dataset overlaps test_set.csv but covers only 22/1155 NULL rows",
+      "category": "Data",
+      "verdict": "verified",
+      "confidence": "HIGH",
+      "critical": false,
+      "redact": true,
+      "hot": false,
+      "tier": "crucial",
+      "version": 1,
+      "author": "deen",
+      "verifier": "deen",
+      "mentions": [],
+      "created": "2026-07-11",
+      "updated": "2026-07-11",
+      "summary": "SOMAJGYAAN (farihashifa/SOMAJGYAAN, MIT license, host-linked via competition-associated author Abdullah Arean), a 4235-row Bangla MCQ dataset, has real exact+fuzzy overlap with test_set.csv's NULL-context rows, but the overlap covers only 22 of 1155 rows (~1.9%) -- real signal, not a standalone validation fix.",
+      "body": "SOMAJGYAAN's file bqad2025.csv has columns Question/Category/Difficulty Fariha/Difficulty Arean/A/B/C/D/Answer, covering History/Economics/Geography/Politics/Social/Law/MISC categories. The 'Difficulty Arean' column and general provenance link it to Abdullah Arean, associated with the competition host -- meaning it sits in the same source distribution as the competition's own data, not an unrelated external corpus. A quarantined lookup script (candidate-pruned fuzzy match, NULL-rows only) found 22 overlaps against test_set.csv: 6 exact matches, 16 fuzzy matches at similarity>=0.92. Of these, 17 produced high-confidence inferred labels (10 faithful, 7 hallucinated; 5 remained uncertain). This confirms the source-distribution signal is real (the host likely drew some test prompts from or near this dataset) but the direct-lookup coverage is far too small to build a standalone validation set from (22 of 1155 NULL rows; CTX rows were not checked by this NULL-only probe). Non-overlapping MCQ rows could theoretically produce LLM-free NULL validation data by treating the correct option as a faithful(1) label and distractors as hallucinated(0), but MCQ option-phrasing style differs from the free-form responses in the actual test set, so that would need its own validation before trusting it.",
+      "evidence": [
+        {
+          "quote": "\"overlap_rows\": 22, \"match_type\": {\"fuzzy\": 16, \"exact\": 6}, \"high_conf_inferred\": 17",
+          "source": "data/external/somajgyaan_lookup_summary.json (generated by notebooks/somajgyaan_lookup_probe.py)",
+          "date": "2026-07-11"
+        }
+      ],
+      "changelog": [
+        {
+          "version": 1,
+          "date": "2026-07-11",
+          "note": "Initial."
+        }
+      ],
+      "action": "Keep as a quarantined source-provenance/lookup diagnostic only. Do not wire into the submission pipeline or treat as ground truth without a rules review -- the dataset's host-linked provenance makes any inference-time lookup against it a potential data-quality/leakage question that has not been resolved.",
+      "glance": "Found a related public quiz dataset that shares some questions with our actual test set -- but it only overlaps a tiny slice (about 2%) of the hardest question band, so it's a clue, not a shortcut.",
+      "why": "Confirms the test set was assembled partly from real Bangladesh general-knowledge sources rather than being fully synthetic, which is useful context for the NULL band's knowledge-gap problem -- but it's small enough that no one should expect it to meaningfully move the score on its own.",
+      "keyEvidence": "Direct exact+fuzzy string matching against test_set.csv found 22 real overlapping rows out of 1155 NULL-context test rows (6 exact, 16 fuzzy at >=0.92 similarity).",
+      "caveat": "This is a NULL-only probe -- CTX-row overlap was not checked. The dataset's link to the competition host (via the 'Difficulty Arean' column) is inferred from naming/authorship patterns, not a confirmed statement from the organizers. Treat any lookup-based label from this dataset as diagnostic, not submission-ready, until rules review."
     }
   ]
 }
